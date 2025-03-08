@@ -1,3 +1,10 @@
+// Verifica se os dados do jogador já existem no localStorage
+const playerData = JSON.parse(localStorage.getItem('playerProgress'));
+if (playerData && playerData.selectedCharacter) {
+    console.log('Jogador já escolheu um personagem. Redirecionando para main.html');
+    window.location.href = 'main.html';
+}
+
 const characters = [
     { title: "Goku", image: "imagens/1goku_1.png" },
     { title: "Gohan", image: "imagens/1gohan_1.png" },
