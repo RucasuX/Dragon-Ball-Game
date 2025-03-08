@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batalha | Dragon Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body class="main-screen">
+    <div class="main-container">
+        <img src="imagens/back_withdraw.png" alt="Background" class="main-background" id="backgroundImage">
+
+        <!-- Header do Jogador -->
+        <header class="main-header">
+            <div class="main-profile">
+                <img id="profile-picture" class="button" src="imagens/100 (29).png" alt="Profile Picture">
+            </div>
+            <div class="main-info">
+                <p id="player-name" class="main-name text-stroke">Nome Jogador</p>
+                <p id="player-power" class="main-power text-stroke">Power 0</p>
+                <p id="player-rank" class="main-rank text-stroke">Rank 1</p>
+            </div>
+            
+            <!-- Contadores -->
+            <div class="main-dragoncoin button">
+                <div>
+                  <img src="imagens/dragoncoin.png" alt="Dragon Coin">
+                  <div id="player-coins" class="main-counter-text number-font">0</div>
+                </div>
+            </div>
+              
+            <div class="main-energy button">
+                <div>
+                  <img src="imagens/energy.png" alt="Energy">
+                  <div id="player-energy" class="main-counter-text number-font">0</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Menu -->
+        <div class="main-menu">
+            <button class="main-menu-button special-attack" id="specialAttackButton">
+                <img src="imagens/special.png" alt="Ataque Especial">
+            </button>
+            <button class="main-menu-button level-up" id="levelUpButton">
+                <img src="imagens/level_up.png" alt="Evoluir">
+            </button>
+        </div>
+
+        <!-- Inimigo -->
+        <div class="enemy-container" id="enemyContainer">
+            <img src="imagens/cell.png" class="enemy-image" alt="Inimigo">
+        </div>
+
+        <!-- Barra de Vida -->
+        <div class="main-health-container">
+            <div class="main-health-bar" id="healthBar"></div>
+            <div class="main-health-text text-stroke" id="healthText">1000 / 1000</div>
+        </div>
+
+        <!-- Número de Dano Flutuante -->
+        <div id="damageNumber" class="damage-number"></div>
+
+        <!-- Container para Mensagens Temporárias (Toasts) -->
+        <div id="toastContainer" class="toast-container"></div>
+
+        <!-- Modal de Recompensa -->
+        <div id="rewardModal" class="modal">
+            <div class="modal-content">
+                <!-- Texto dinâmico -->
+                <p id="rewardText" class="reward-text">You defeated Enemy, here is your reward.</p>
+                
+                <!-- Container da recompensa (imagem + texto) -->
+                <div class="reward-container">
+                    <img src="imagens/dragoncoin_ico2.png" alt="Dragon Coin" class="reward-icon">
+                    <span id="rewardAmount" class="reward-amount">0</span>
+                </div>
+                
+                <!-- Botão de fechar/resgatar recompensa (imagem no HTML) -->
+                <div class="reward-button-container">
+                    <button id="rewardButton" class="reward-button">
+                        <img src="imagens/claim.png" alt="Resgatar Recompensa">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Upgrades -->
+    <div id="upgradeModal" class="modal">
+        <div class="modal-content">
+            <!-- Conteúdo do modal -->
+            <div class="character-image-container">
+                <img id="characterImage" src="imagens/gohan_1.png" alt="Personagem">
+            </div>
+            <!-- Contador de Dragon Coins -->
+            <div class="dragoncoin-counter">
+                <img src="imagens/dragoncoin.png" alt="Dragon Coin">
+                <span id="upgrade-player-coins" class="number-font">0</span>
+            </div>
+
+            <!-- Informações do Jogador -->
+            <div class="player-info">
+                <p id="upgrade-player-name" class="player-name"><span>Goku</span></p>
+                <p id="upgrade-player-level" class="player-level">Level: 10</p>
+                <p id="upgrade-player-power" class="player-power">Poder: 1500</p>
+            </div>
+
+            <!-- Botões de Upgrade -->
+            <div class="upgrade-buttons">
+                <!-- Linha 1 -->
+                <div class="upgrade-button-row">
+                    <!-- Botão de Upar Ataque -->
+                    <div class="upgrade-button-container">
+                        <button id="upgrade-attack-button" class="upgrade-button">
+                            <img src="imagens/up_attack.png" alt="Upar Ataque">
+                        </button>
+                        <div class="upgrade-cost">
+                            <img src="imagens/dragoncoin_ico.png" alt="Dragon Coin">
+                            <span id="upgrade-attack-cost">100</span>
+                        </div>
+                    </div>
+
+                    <!-- Botão de Upar Ataque Especial -->
+                    <div class="upgrade-button-container">
+                        <button id="upgrade-special-button" class="upgrade-button">
+                            <img src="imagens/up_spattack.png" alt="Upar Ataque Especial">
+                        </button>
+                        <div class="upgrade-cost">
+                            <img src="imagens/dragoncoin_ico.png" alt="Dragon Coin">
+                            <span id="upgrade-special-cost">150</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Linha 2 -->
+                <div class="upgrade-button-row">
+                    <!-- Botão de Upar Energia -->
+                    <div class="upgrade-button-container">
+                        <button id="upgrade-energy-button" class="upgrade-button">
+                            <img src="imagens/up_energy.png" alt="Upar Energia">
+                        </button>
+                        <div class="upgrade-cost">
+                            <img src="imagens/dragoncoin_ico.png" alt="Dragon Coin">
+                            <span id="upgrade-energy-cost">200</span>
+                        </div>
+                    </div>
+
+                    <!-- Botão de Voltar -->
+                    <div class="upgrade-button-container">
+                        <button id="closeModalButton" class="upgrade-button">
+                            <img src="imagens/up_close.png" alt="Fechar">
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Derrota do Inimigo -->
+    <div id="enemyDefeatModal" class="modal">
+        <div class="modal-content">
+            <!-- Texto dinâmico -->
+            <p id="defeatMessage" class="modal-text">You defeated Enemy, here is your reward.</p>
+            
+            <!-- Recompensa -->
+            <div class="reward-container">
+                <img src="imagens/dragoncoin_ico.png" alt="Dragon Coin" class="reward-icon">
+                <span id="rewardAmount" class="reward-text">100</span>
+            </div>
+            
+            <!-- Botão de confirmação -->
+            <img src="imagens/claim.png" alt="Confirmar" class="confirm-button" id="confirmRewardButton">
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw | Dragon Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/withdraw.css">
+</head>
+<body class="main-screen">
+    <div class="main-container">
+        <img src="imagens/withdraw_bg.jpg" alt="Background" class="main-background">
+
+        <!-- Header do Jogador -->
+        <header class="main-header">
+            <div class="main-profile">
+                <img id="profile-picture" class="button" src="imagens/100 (29).png" alt="Profile Picture">
+            </div>
+            <div class="main-info">
+                <p id="player-name" class="main-name text-stroke">Nome Jogador</p>
+                <p id="player-power" class="main-power text-stroke">Power 0</p>
+                <p id="player-rank" class="main-rank text-stroke">Rank 1</p>
+            </div>
+            
+            <!-- Contadores -->
+            <div class="main-dragoncoin button">
+                <div>
+                  <img src="imagens/dragoncoin.png" alt="Dragon Coin">
+                  <div id="player-coins" class="main-counter-text number-font">0</div>
+                </div>
+            </div>
+              
+            <div class="main-energy button">
+                <div>
+                  <img src="imagens/energy.png" alt="Energy">
+                  <div id="player-energy" class="main-counter-text number-font">0</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Caixa de texto abaixo do header -->
+        <section class="text-box">
+            <p id="reminder-text">Reminder: For your withdrawal to be successful, you must be at least level X and hold the same amount you are withdrawing for at least 24 hours; otherwise, the withdrawal will be declined.</p>
+        </section>
+
+        <!-- Campo de entrada Amount -->
+        <section class="input-container">
+            <div class="input-group">
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" class="input-field amount-input" min="0" minlength="5" maxlength="20" required>
+            </div>
+            <div class="input-group">
+                <label for="wallet">Your wallet:</label>
+                <input type="text" id="wallet" class="input-field wallet-input" pattern="[A-Za-z0-9]{44}" required>
+            </div>
+        </section>
+
+        <!-- Botão de Withdraw -->
+        <section class="button-container">
+            <button id="withdrawButton" class="action-button">
+                <img src="imagens/withdraw_2.png" alt="Withdraw">
+            </button>
+        </section>
+
+        <!-- Segunda caixa de texto -->
+        <section class="text-box second-text-box">
+            <p id="donation-text">If you want to support the team, consider donating. Copy the address below and send your donation through any EVM network (Solana, Ethereum, Base, etc). This helps us a lot.</p>
+        </section>
+
+        <!-- Botão de Copy Address -->
+        <section class="button-container second-button">
+            <button id="copyAddressButton" class="action-button">
+                <img src="imagens/copyadress.png" alt="Copy Address">
+            </button>
+        </section>
+    </div>
+
+    <!-- Container para Mensagens Temporárias (Toasts) -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="js/withdraw.js"></script>
+</body>
+</html>

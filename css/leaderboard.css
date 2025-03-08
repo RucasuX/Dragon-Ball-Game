@@ -1,0 +1,294 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.main-screen {
+  margin: 0;
+  padding: 120px 0 20px 0; /* 120px de padding-top para o header */
+  width: 100vw; /* Largura total da tela */
+  height: 100vh; /* Altura total da tela */
+  overflow-y: auto; /* Permite rolagem vertical */
+  position: fixed;
+  background: #000;
+  font-family: 'Poppins', sans-serif;
+}
+  
+  .text-stroke {
+    text-shadow: 
+        1px 1px 0px #000, 
+        -1px -1px 0px #000, 
+        -1px 1px 0px #000, 
+        1px -1px 0px #000;
+  }
+  
+  .number-font {
+    font-family: Poppins;
+    font-weight: 800;
+  }
+  
+  .main-container {
+    position: relative;
+    width: 100vw; /* Largura total da tela */
+    height: 100vh; /* Altura total da tela */
+}
+  
+.main-background {
+  position: fixed; /* Fixa o fundo na tela */
+  top: 0;
+  left: 0;
+  width: 100%; /* Ocupa a largura total da tela */
+  height: 100%; /* Ocupa a altura total da tela */
+  object-fit: cover; /* Garante que a imagem cubra toda a área */
+  z-index: -1; /* Coloca o fundo atrás de tudo */
+}
+  
+.main-header {
+  position: fixed; /* Mantém o header fixo no topo */
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%; /* Ocupa a largura total da tela */
+  height: 106px;
+  padding: 16px 12px;
+  display: flex;
+  gap: 11px;
+  box-sizing: border-box;
+  z-index: 1000; /* Garante que o header fique acima de tudo */
+  background-color: transparent; /* Remove o fundo do header */
+}
+  
+  .main-profile {
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;
+    background: #33363A;
+    box-shadow: 2px 2px 0px #000;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  
+  .main-profile img {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+  }
+  
+  .main-info {
+    flex-grow: 1;
+    min-width: 0;
+    margin-right: 11px;
+  }
+  
+  .main-name {
+    color: #FFF;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 24px;
+    white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+    overflow: hidden; /* Esconde o texto que ultrapassar o limite */
+    text-overflow: ellipsis; /* Adiciona reticências (...) */
+    margin: 0;
+    max-width: 300px; /* Aumente o valor ou remova completamente */
+}
+  
+  .main-power,
+  .main-rank {
+    color: #FFF;
+    font-family: Poppins;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    margin: 4px 0 0 0;
+  }
+  
+  .main-dragoncoin,
+  .main-energy {
+    position: absolute;
+    right: 12px;
+    width: 119px;
+    height: 36px;
+  }
+  
+  .main-dragoncoin {
+    top: 16px;
+  }
+  
+  .main-energy {
+    top: 56px;
+  }
+  
+  .main-dragoncoin,
+  .main-energy {
+    position: absolute;
+    right: 12px;
+    width: 119px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .main-dragoncoin > div,
+  .main-energy > div {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .main-dragoncoin img,
+  .main-energy img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .main-counter-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 45px;
+    text-align: center;
+    color: #FFF;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 2;
+    text-shadow: 
+        1px 1px 0px #000, 
+        -1px -1px 0px #000, 
+        -1px 1px 0px #000, 
+        1px -1px 0px #000;
+    white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+    overflow: hidden; /* Esconde o texto que ultrapassar o limite */
+    text-overflow: ellipsis; /* Adiciona reticências (...) */
+  }
+
+  .leaderboard-title {
+    text-align: center;
+    width: 100%; /* Ocupa a largura total da tela */
+    /* Remova o margin-top: 120px; */
+}
+
+.leaderboard-title h1 {
+    font-family: 'Poppins', sans-serif; /* Usa a fonte Poppins */
+    font-size: 20px; /* Tamanho da fonte */
+    font-weight: 800; /* Peso da fonte (ExtraBold) */
+    color: #ffffff; /* Cor do texto */
+    text-shadow: 
+        1px 1px 0px #000, 
+        -1px -1px 0px #000, 
+        -1px 1px 0px #000, 
+        1px -1px 0px #000;
+}
+
+.leaderboard-container {
+  position: relative;
+  z-index: 10; /* Z-index menor que o header */
+  margin-top: 120px; /* Espaço para o header */
+  padding-bottom: 20px; /* Espaço no final para rolagem */
+}
+
+  /* Container principal do jogador */
+  .player-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 90%; /* Ocupa 90% da largura da tela */
+    max-width: 324px; /* Limite máximo de largura */
+    height: 58px;
+    background-image: url('../imagens/leader_container.png');
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+    padding-right: 8px;
+    box-sizing: border-box;
+    margin: 0 auto; /* Centraliza horizontalmente */
+    margin-bottom: 12px;
+}
+
+  /* Container das fotos do jogador */
+  .player-photo-container {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #33363A;
+      border: 1px solid #000;
+      flex-shrink: 0; /* Garante que a imagem não seja reduzida */
+  }
+  
+  .player-photo-container img {
+      width: 100%; /* Ajusta a largura para ocupar todo o container */
+      height: 100%; /* Ajusta a altura para ocupar todo o container */
+      object-fit: cover; /* Mantém a proporção e preenche o espaço sem distorcer */
+  }
+  
+  .player-photo-container:first-child {
+      margin-left: 8px; /* Adiciona 8px apenas na primeira imagem */
+  }
+  
+  /* Estilo das fotos do jogador */
+  .player-info-grid {
+      display: grid;
+      grid-template-columns: 1fr auto; /* Nome/Power cresce, Level/Rank fixa */
+      gap: 4px 12px;
+      width: 100%; /* Garante que o grid ocupe toda a largura */
+      box-sizing: border-box;
+  }
+  
+  /* Estilo dos textos */
+  .player-text {
+      margin: 0;
+      color: #FFF;
+      font-family: Poppins, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      text-shadow: 
+          1px 1px 0px #000, 
+          -1px -1px 0px #000, 
+          -1px 1px 0px #000, 
+          1px -1px 0px #000;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
+  
+  /* Nome e Power truncados para não esticar tudo */
+  #ranking-player-name, #ranking-player-power {
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+  }
+  
+  /* Nome do jogador com fonte mais forte */
+  #ranking-player-name {
+      font-size: 12px;
+      font-weight: 800;
+  }
+  
+  /* Rank dourado */
+  #ranking-player-rank {
+      color: #FFD700;
+  }
+  
+  /* Ajuste para Level e Rank */
+  #ranking-player-level, #ranking-player-rank {
+      text-align: right;
+      min-width: 75px;
+      max-width: 75px;
+      justify-self: end; /* Mantém à direita no grid */
+      display: flex;
+      justify-content: flex-end; /* Alinha completamente à direita */
+  }

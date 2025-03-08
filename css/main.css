@@ -1,0 +1,674 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Remove as barras de rolagem */
+}
+
+.main-screen {
+  margin: 0;
+  padding: 120px 0 20px 0;
+  width: 100vw;
+  height: 100vh; /* Ocupa toda a altura da viewport */
+  overflow: visible; /* Permite que o conteúdo ultrapasse os limites */
+  position: relative;
+  background: #000;
+  font-family: 'Poppins', sans-serif;
+}
+
+.text-stroke {
+  text-shadow: 
+      1px 1px 0px #000, 
+      -1px -1px 0px #000, 
+      -1px 1px 0px #000, 
+      1px -1px 0px #000;
+}
+
+.number-font {
+  font-family: Poppins;
+  font-weight: 800;
+}
+
+.main-container {
+  display: flex; /* Adicione esta linha */
+  justify-content: space-between; /* Alinha os itens horizontalmente */
+  position: relative;
+  width: 100vw; /* Ocupa toda a largura da tela */
+  height: 100vh; /* Ocupa toda a altura da tela */
+  overflow: visible; /* Permite que o conteúdo ultrapasse os limites */
+}
+
+.main-background {
+  position: fixed; /* Fixa o fundo na tela */
+  top: 0;
+  left: 0;
+  width: 100%; /* Ocupa a largura total da tela */
+  height: 100%; /* Ocupa a altura total da tela */
+  object-fit: cover; /* Garante que a imagem cubra toda a área */
+  z-index: -1; /* Coloca o fundo atrás de tudo */
+}
+
+.main-header {
+  position: fixed; /* Mantém o header fixo no topo */
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%; /* Ocupa a largura total da tela */
+  height: 106px;
+  padding: 16px 12px;
+  display: flex;
+  gap: 11px;
+  box-sizing: border-box;
+  z-index: 1000; /* Garante que o header fique acima de tudo */
+  background-color: transparent; /* Remove o fundo do header */
+}
+
+.main-profile {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  background: #33363A;
+  box-shadow: 2px 2px 0px #000;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.main-profile img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.main-info {
+  flex-grow: 1;
+  min-width: 0;
+  margin-right: 11px;
+}
+
+.main-name {
+  color: #FFF;
+  font-family: Poppins;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 24px;
+  white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+  overflow: hidden; /* Esconde o texto que ultrapassar o limite */
+  text-overflow: ellipsis; /* Adiciona reticências (...) */
+  margin: 0;
+  max-width: 300px; /* Aumente o valor ou remova completamente */
+}
+
+.main-power,
+.main-rank {
+  color: #FFF;
+  font-family: Poppins;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+  margin: 4px 0 0 0;
+}
+
+.main-dragoncoin,
+.main-energy {
+  position: absolute;
+  right: 14px;
+  width: 119px;
+  height: 36px;
+}
+
+.main-dragoncoin {
+  top: 16px;
+}
+
+.main-energy {
+  top: 56px;
+}
+
+.main-dragoncoin,
+.main-energy {
+  position: absolute;
+  right: 12px;
+  width: 119px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.main-dragoncoin > div,
+.main-energy > div {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.main-dragoncoin img,
+.main-energy img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.main-counter-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 45px;
+  text-align: center;
+  color: #FFF;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 2;
+  text-shadow: 
+      1px 1px 0px #000, 
+      -1px -1px 0px #000, 
+      -1px 1px 0px #000, 
+      1px -1px 0px #000;
+  white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+  overflow: hidden; /* Esconde o texto que ultrapassar o limite */
+  text-overflow: ellipsis; /* Adiciona reticências (...) */
+}
+
+.enemy-container {
+  position: fixed; /* Posicionamento fixo para garantir que fique no bottom */
+  width: 360px; /* Largura do container */
+  height: 562px; /* Altura do container */
+  cursor: pointer;
+  left: 50%; /* Centraliza horizontalmente */
+  bottom: 8px; /* Alinha o container com o bottom da tela */
+  transform: translateX(-50%); /* Ajusta a centralização horizontal */
+  overflow: visible; /* Permite que a imagem ultrapasse os limites do container */
+}
+
+.enemy-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Redimensiona a imagem para caber no container */
+  transition: transform 0.1s;
+}
+
+.main-health-container {
+  position: fixed;
+  width: 328px;
+  height: 20px;
+  border-radius: 8px;
+  border: 1px solid #000;
+  background: #191919;
+  box-shadow: 
+      2px 2px 0px #000,
+      inset 0px 1px 3px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  z-index: 100;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 24px; /* 24px acima do bottom */
+}
+
+.main-health-bar {
+  height: 100%;
+  background: linear-gradient(#7ED957, #6ABD40, #5CA936);
+  width: 100%;
+}
+
+.main-health-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #FFF;
+  font-family: Poppins;
+  font-size: 12px;
+  font-weight: 800;
+  text-shadow: 
+      1px 1px 0px #000,
+      -1px -1px 0px #000, 
+      -1px 1px 0px #000,
+      1px -1px 0px #000;
+}
+
+.main-menu {
+  position: fixed;
+  top: 106px; /* Mantém a distância do topo */
+  left: 50%; /* Centraliza horizontalmente */
+  transform: translateX(-50%); /* Ajusta a centralização horizontal */
+  width: 100%; /* Largura do menu */
+  height: 24px; /* Altura do menu */
+  display: flex;
+  justify-content: space-between; /* Espaço entre os botões */
+  z-index: 100; /* Z-index para garantir que fique acima de outros elementos */
+  box-sizing: border-box; /* Garante que o padding seja incluído na largura */
+}
+
+.main-menu-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.main-menu-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Garante que a imagem do botão se ajuste ao tamanho */
+}
+
+.special-attack { 
+  width: 94px; /* Largura do botão de ataque especial */
+  margin-left: 11px; /* 11px da esquerda */
+}
+
+.level-up { 
+  width: 94px; /* Largura do botão de level up */
+  margin-right: 11px; /* 11px da direita */
+}
+
+.damage-number {
+  position: absolute;
+  color: #ffffff;
+  font-family: Poppins;
+  font-size: 20px;
+  font-weight: 800;
+  text-shadow: 
+      1px 1px 0px #000,
+      -1px -1px 0px #000, 
+      -1px 1px 0px #000,
+      1px -1px 0px #000;
+  animation: floatUp 1s ease-out;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-50px); opacity: 0; }
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
+
+.enemy-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.enemy-pulse {
+  animation: pulse 0.3s ease-in-out;
+}
+
+.special-damage-number {
+  color: #ffffff;
+  font-size: 32px;
+  font-family: Poppins;
+  font-weight: 900;
+  text-shadow: 
+      1px 1px 0px #000,
+      -1px -1px 0px #000, 
+      -1px 1px 0px #000,
+      1px -1px 0px #000;
+}
+
+/* Modal de Upgrades */
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 332px; /* Largura do modal */
+  height: 300px; /* Altura do modal */
+  background-image: url('../imagens/modal_1.png'); /* Caminho correto para a imagem de fundo */
+  background-size: cover; /* Garante que a imagem cubra todo o modal */
+  background-position: center; /* Centraliza a imagem de fundo */
+  border-radius: 10px;
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Container da Imagem do Personagem */
+.character-image-container {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 176px; /* Largura do container */
+  height: 266px; /* Altura do container */
+  overflow: hidden;
+}
+
+.character-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ajusta a imagem ao container */
+}
+
+/* Contador de Dragon Coins */
+.dragoncoin-counter {
+  position: absolute;
+  left: 178px;
+  top: 16px; /* 16px do topo */
+  width: 119px; /* Largura do contador */
+  height: 36px; /* Altura do contador */
+  display: flex;
+  align-items: center;
+}
+
+.dragoncoin-counter img {
+  width: 100%; /* A imagem ocupa 100% do container */
+  height: 100%;
+  object-fit: contain; /* Mantém a proporção da imagem */
+}
+
+.dragoncoin-counter span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 45px;
+  text-align: center;
+  color: #FFF;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 2;
+  text-shadow: 
+      1px 1px 0px #000, 
+      -1px -1px 0px #000, 
+      -1px 1px 0px #000, 
+      1px -1px 0px #000;
+  white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+  overflow: hidden; /* Esconde o texto que ultrapassar o limite */
+  text-overflow: ellipsis; /* Adiciona reticências (...) */
+}
+
+/* Informações do Jogador */
+.player-info {
+  position: absolute;
+  left: 178px; /* 2px à direita do container da imagem (176px + 2px) */
+  top: 58px; /* 52px do topo (abaixo do contador de Dragon Coins) */
+  text-align: right; /* Alinha o nome à direita */
+  text-shadow: 
+      1px 1px 0px #000, 
+      -1px -1px 0px #000, 
+      -1px 1px 0px #000, 
+      1px -1px 0px #000;
+}
+
+.player-name {
+  font-family: Poppins;
+  font-size: 14px;
+  font-weight: 800;
+  color: #FFF;
+  margin: 0;
+  text-align: left; /* Garante que o nome fique alinhado à direita */
+}
+
+.player-name span {
+  display: inline-block; /* Garante que o span se comporte como um bloco */
+  width: 100%; /* Ocupa toda a largura do parágrafo */
+}
+
+.player-level,
+.player-power {
+  font-family: Poppins;
+  font-size: 12px;
+  font-weight: 600;
+  color: #FFF;
+  margin: 2px 0 0 0;
+  text-align: left; /* Alinha level e poder à esquerda */
+}
+
+/* Botões de Upgrade */
+.upgrade-buttons {
+  position: absolute;
+  left: 178px; /* 2px à direita do container da imagem (176px + 2px) */
+  bottom: 20px; /* 16px da base do modal */
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* Espaço entre as linhas de botões */
+}
+
+.upgrade-button-row {
+  display: flex;
+  gap: 16px; /* Espaço entre os botões na mesma linha */
+}
+
+.upgrade-button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.upgrade-button {
+  width: 56px;
+  height: 56px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.upgrade-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.upgrade-cost {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px; /* 3px abaixo do botão */
+  font-family: Poppins;
+  font-weight: 800;
+  font-size: 10px;
+  color: #FFF;
+  text-shadow: 
+      1px 1px 0px #000, 
+      -1px -1px 0px #000, 
+      -1px 1px 0px #000, 
+      1px -1px 0px #000;
+}
+
+.upgrade-cost img {
+  width: 12px;
+  height: 12px;
+}
+
+/* Estilo do modal */
+#upgradeModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 332px; /* Largura do modal */
+  height: 300px; /* Altura do modal */
+  background-image: url('../imagens/modal_1.png'); /* Imagem de fundo do modal */
+  background-size: cover; /* Cobrir todo o modal */
+  background-position: center; /* Centralizar a imagem de fundo */
+  border-radius: 10px; /* Bordas arredondadas */
+  z-index: 1000; /* Z-index maior que o overlay */
+  display: none; /* Escondido por padrão */
+}
+
+/* Quando o modal estiver aberto */
+#upgradeModal.active {
+  display: block;
+}
+
+/* Conteúdo do modal */
+.modal-content {
+  position: relative;
+  z-index: 1001; /* Z-index maior que o overlay */
+}
+
+/* Estilo do modal de recompensas */
+#rewardModal {
+  display: none; /* Escondido por padrão */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 324px; /* Largura do modal */
+  height: 182px; /* Altura do modal */
+  background-image: url('../imagens/modal_2.png'); /* Imagem de fundo do modal */
+  background-size: cover; /* Cobrir todo o modal */
+  background-position: center; /* Centralizar a imagem de fundo */
+  border-radius: 10px; /* Bordas arredondadas */
+  z-index: 1000; /* Garantir que fique acima de outros elementos */
+}
+
+/* Conteúdo do modal */
+#rewardModal .modal-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Centralizar verticalmente */
+}
+
+/* Texto do modal */
+#rewardText {
+  font-family: Poppins, sans-serif; /* Fonte Poppins */
+  font-size: 14px; /* Tamanho da fonte */
+  font-weight: 600; /* Peso da fonte */
+  color: white; /* Cor do texto */
+  text-align: center; /* Centralizar horizontalmente */
+  margin-top: 16px; /* 16px do topo do modal */
+  text-shadow: 
+      1px 1px 0px #000, 
+      -1px -1px 0px #000, 
+      -1px 1px 0px #000, 
+      1px -1px 0px #000; /* Sombra no texto */
+}
+
+/* Container da recompensa (imagem + texto) */
+.reward-container {
+  display: flex;
+  align-items: center; /* Alinhar imagem e texto verticalmente */
+  margin-top: 0px; /* 16px abaixo do texto */
+  gap: 8px; /* Espaço de 8px entre a imagem e o texto */
+}
+
+/* Imagem da recompensa (Dragon Coin) */
+.reward-container img {
+  width: 36px; /* Largura da imagem */
+  height: 36px; /* Altura da imagem */
+}
+
+/* Texto da recompensa (Dragon Coins) */
+#rewardAmount {
+  font-family: Poppins, sans-serif; /* Fonte Poppins */
+  font-size: 22px; /* Tamanho da fonte */
+  font-weight: 800; /* Peso da fonte */
+  color: white; /* Cor do texto */
+  text-shadow: 
+      1px 1px 0px #000, 
+      -1px -1px 0px #000, 
+      -1px 1px 0px #000, 
+      1px -1px 0px #000; /* Sombra no texto */
+}
+
+/* Botão de resgatar recompensa */
+.reward-button-container {
+  margin-top: 16px; /* 16px abaixo do container da recompensa */
+}
+
+.reward-button-container button {
+  background: none; /* Remover fundo padrão */
+  border: none; /* Remover borda */
+  padding: 0; /* Remover padding */
+  cursor: pointer; /* Cursor de clique */
+}
+
+.reward-button-container img {
+  width: 114px; /* Largura da imagem do botão */
+  height: 58px; /* Altura da imagem do botão */
+}
+
+/* Container para mensagens temporárias (toasts) */
+.toast-container {
+  position: fixed;
+  bottom: 20px; /* Posiciona no canto inferior */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100; /* Z-index alto para ficar acima de tudo */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px; /* Espaço entre as mensagens */
+}
+
+/* Estilo das mensagens temporárias */
+.toast-message {
+  background: rgba(0, 0, 0, 0.8); /* Fundo escuro semi-transparente */
+  color: white; /* Cor do texto */
+  font-family: Poppins, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: toastFadeInOut 3s ease-in-out; /* Animação de aparecer e desaparecer */
+  opacity: 0; /* Inicia invisível */
+}
+
+@keyframes modalEntrance {
+  from {
+      transform: translateY(-100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+/* Animação para as mensagens temporárias */
+@keyframes toastFadeInOut {
+  0% { opacity: 0; transform: translateY(20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(20px); }
+}
+
+@keyframes buttonClick {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+button {
+  transition: transform 0.1s ease;
+  cursor: pointer; /* Adiciona o cursor de clique */
+}
+
+button:active {
+  animation: buttonClick 0.2s ease;
+}

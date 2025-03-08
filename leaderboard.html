@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard | Dragon Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/leaderboard.css"> <!-- Mantendo o CSS separado -->
+</head>
+<body class="main-screen">
+    <img src="imagens/leaderboard_bg.jpg" alt="Background" class="main-background">
+    <!-- Header do Jogador (jogador atual) -->
+    <header class="main-header">
+        <div class="main-profile">
+            <img id="profile-picture" class="button" src="imagens/100 (29).png" alt="Profile Picture">
+        </div>
+        <div class="main-info">
+            <p id="player-name" class="main-name text-stroke">Nefer Tchola</p>
+            <p id="player-power" class="main-power text-stroke">Power 999999</p>
+            <p id="player-rank" class="main-rank text-stroke">Rank 999999</p>
+        </div>
+        
+        <!-- Contadores -->
+        <div class="main-dragoncoin button">
+            <div>
+                <img src="imagens/dragoncoin.png" alt="Dragon Coin">
+                <div id="player-coins" class="main-counter-text number-font">0</div>
+            </div>
+        </div>
+        
+        <div class="main-energy button">
+            <div>
+                <img src="imagens/energy.png" alt="Energy">
+                <div id="player-energy" class="main-counter-text number-font">0</div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Título "Leaderboard" -->
+    <div class="leaderboard-title">
+        <h1 class="text-stroke">Leaderboard</h1>
+    </div>
+
+    <!-- Container do Jogador (outros jogadores no ranking) -->
+    <div class="player-container">
+        <!-- Foto do jogador (ícone de perfil) -->
+        <div class="player-photo-container">
+            <img id="ranking-profile-picture" src="imagens/100 (29).png" alt="Ícone do Jogador" class="player-photo">
+        </div>
+
+        <!-- Segunda foto (foto de perfil escolhida) -->
+        <div class="player-photo-container">
+            <img id="ranking-hero-picture" src="imagens/100 (29).png" alt="Foto de Perfil do Jogador" class="player-photo">
+        </div>
+
+        <!-- Informações do jogador em grid 2x2 -->
+        <div class="player-info-grid">
+            <p id="ranking-player-name" class="player-text container-name">Nome</p>
+            <p id="ranking-player-level" class="player-text container-level">Level: 1</p>
+            <p id="ranking-player-power" class="player-text container-power">Power</p>
+            <p id="ranking-player-rank" class="player-text container-rank">Rank: 9999</p>
+        </div>
+    </div>
+
+    <script src="js/leaderboard.js"></script> <!-- Script para carregar dados dinâmicos -->
+</body>
+</html>
