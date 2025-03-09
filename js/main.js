@@ -1,30 +1,9 @@
 Telegram.WebApp.ready();
-javascript
-Copy
+console.log('Telegram.WebApp:', Telegram.WebApp);
+console.log('Dados do usuário:', Telegram.WebApp.initDataUnsafe.user);
+
 // Verifica se está rodando no Telegram
-if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-    // Inicializa o WebApp
-    Telegram.WebApp.ready();
-
-    // Carrega os dados do jogador do CloudStorage
-    Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
-        if (err) {
-            console.error('Erro ao carregar dados do CloudStorage:', err);
-        } else {
-            const playerData = JSON.parse(data);
-            console.log('Dados do jogador:', playerData);
-
-            // Atualiza a interface com os dados do jogador
-            // Exemplo: Exibir o nome do personagem selecionado
-            const characterNameElement = document.getElementById('character-name');
-            if (characterNameElement && playerData.selectedCharacter) {
-                characterNameElement.textContent = playerData.selectedCharacter;
-            }
-        }
-    });
-} else {
-    console.error('Telegram.WebApp não está disponível. Rodando fora do Telegram?');
-}
+const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
 
 document.addEventListener('DOMContentLoaded', () => {
     const player = window.player || {
