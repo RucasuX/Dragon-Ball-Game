@@ -1,4 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const player = window.player || {
+        baseDamage: 1,
+        level: 1,
+        dragonCoins: 0,
+        energy: 0,
+        maxEnergy: 60,
+        specialAttackUses: 5, // Cargas atuais
+        maxSpecialAttackUses: 5, // Valor máximo de cargas (pode aumentar com upgrades)
+        lastSpecialAttackUse: 0,
+        upgradeAttackCost: 100,
+        upgradeSpecialCost: 100,
+        upgradeEnergyCost: 50,
+        power: 0,
+        rank: 0,
+        selectedCharacter: 'Gohan', // Valor padrão
+        playerName: 'Jogador', // Nome padrão
+        playerPhoto: 'imagens/default_profile.png' // Foto padrão
+    };
+   
     // Verifica se está rodando no Telegram
     const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
 
@@ -43,42 +62,11 @@ loadPlayerData(function(playerData) {
         }
 
         // Atualiza outros dados do jogador
-        player.selectedCharacter = playerData.selectedCharacter;
-        player.level = playerData.level;
-        player.dragonCoins = playerData.dragonCoins;
-        player.energy = playerData.energy;
-        player.maxEnergy = playerData.maxEnergy;
-        player.power = playerData.power;
-        player.rank = playerData.rank;
-
-        // Atualiza a interface
-        updateDragonCoins();
-        updateEnergy();
-        updateUpgradeCosts();
-        updatePlayerLevel();
-        updatePlayerPower();
-        updateCharacterImage();
+        Object.assign(player, playerData);
     } else {
         console.log('Nenhum dado salvo encontrado. Iniciando com valores padrão.');
     }
 });
-
-    const player = window.player || {
-        baseDamage: 1,
-        level: 1,
-        dragonCoins: 0,
-        energy: 0,
-        maxEnergy: 60,
-        specialAttackUses: 5, // Cargas atuais
-        maxSpecialAttackUses: 5, // Valor máximo de cargas (pode aumentar com upgrades)
-        lastSpecialAttackUse: 0,
-        upgradeAttackCost: 100,
-        upgradeSpecialCost: 100,
-        upgradeEnergyCost: 50,
-        power: 0,
-        rank: 0,
-        selectedCharacter: 'Gohan' // Valor padrão
-    };
 
     const punchSound = new Audio('sounds/punch_1.ogg');
     const specialAttackSound = new Audio('sounds/special_attack.mp3');
