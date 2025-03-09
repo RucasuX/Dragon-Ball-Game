@@ -1,3 +1,6 @@
+console.log('Telegram.WebApp:', Telegram.WebApp);
+console.log('Dados do usuário:', Telegram.WebApp.initDataUnsafe.user);
+
 // Verifica se está rodando no Telegram
 const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
 
@@ -26,9 +29,6 @@ const characters = [
     { title: "Vegeta", image: "imagens/1vegeta_1.png" },
     { title: "Trunks", image: "imagens/1trunks_1.png" }
 ];
-
-console.log('Telegram.WebApp:', Telegram.WebApp);
-console.log('Dados do usuário:', Telegram.WebApp.initDataUnsafe.user);
 
 let currentCharacterIndex = 0;
 const characterImage = document.querySelector('.character-image');
