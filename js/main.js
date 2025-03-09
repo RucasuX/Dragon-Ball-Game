@@ -1,4 +1,5 @@
 Telegram.WebApp.ready();
+console.log('Script carregado com sucesso!');
 
 document.addEventListener('DOMContentLoaded', () => {
     const player = window.player || {
