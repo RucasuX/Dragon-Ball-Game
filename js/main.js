@@ -1,3 +1,5 @@
+Telegram.WebApp.ready();
+
 document.addEventListener('DOMContentLoaded', () => {
     const player = window.player || {
         baseDamage: 1,

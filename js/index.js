@@ -1,3 +1,4 @@
+Telegram.WebApp.ready();
 console.log('Telegram.WebApp:', Telegram.WebApp);
 console.log('Dados do usuário:', Telegram.WebApp.initDataUnsafe.user);
 
