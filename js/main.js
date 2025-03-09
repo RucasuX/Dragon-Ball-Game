@@ -466,16 +466,6 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
         });
     }
 
-    // Exemplo de uso
-    const rankingPlayer = {
-        name: "JogadorRanking10000",
-        level: 150,
-        power: 50000,
-        rank: 2
-    };
-
-updateRankingPlayer(rankingPlayer);
-
     // Gerar energia a cada segundo
     setInterval(() => {
         if (player.energy < player.maxEnergy) {
