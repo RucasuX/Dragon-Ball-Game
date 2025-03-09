@@ -672,3 +672,35 @@ button {
 button:active {
   animation: buttonClick 0.2s ease;
 }
+
+/* Estilo para o botão de limpeza */
+.clear-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #ff4d4d;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clear-button:hover {
+  background-color: #ff1a1a;
+}
+
+/* Estilo para a mensagem de sucesso */
+.success-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 128, 0, 0.8);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  z-index: 1000;
+}

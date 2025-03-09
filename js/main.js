@@ -716,6 +716,32 @@ function defeatEnemy() {
     }
 });
 
+// Evento para o botão de limpeza de dados
+document.querySelector('#clear-storage').addEventListener('click', () => {
+    Telegram.WebApp.CloudStorage.removeItem('playerProgress', function(err) {
+        if (err) {
+            console.error('Erro ao limpar os dados:', err);
+            showError('Erro ao limpar os dados. Tente novamente.');
+        } else {
+            console.log('Dados do jogador removidos com sucesso.');
+            showMessage('Dados do jogador foram limpos. Recarregue a página.');
+        }
+    });
+});
+
+// Função para mostrar uma mensagem de sucesso
+function showMessage(message) {
+    const messageElement = document.createElement('div');
+    messageElement.className = 'success-message';
+    messageElement.textContent = message;
+    document.body.appendChild(messageElement);
+
+    // Remove a mensagem após alguns segundos
+    setTimeout(() => {
+        messageElement.remove();
+    }, 5000);
+}
+
     // Próximo inimigo
     function nextEnemy() {
         console.log('Passando para o próximo inimigo...');
