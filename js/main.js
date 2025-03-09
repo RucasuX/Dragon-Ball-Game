@@ -258,7 +258,9 @@ window.addEventListener('popstate', () => {
             upgradeEnergyCost: player.upgradeEnergyCost,
             power: player.power,
             rank: player.rank,
-            lastUpdate: Date.now()
+            lastUpdate: Date.now(),
+            playerName: player.playerName, // Salva o nome do jogador
+            playerPhoto: player.playerPhoto // Salva a foto do jogador
         };
     
         // Salva os dados no CloudStorage do Telegram
@@ -268,7 +270,7 @@ window.addEventListener('popstate', () => {
             } else {
                 console.log('Progresso salvo com sucesso:', saveData);
             }
-        });
+        };
     }
     
     // Função para atualizar o perfil do jogador
