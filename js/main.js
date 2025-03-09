@@ -1,9 +1,19 @@
-Telegram.WebApp.ready();
-console.log('Telegram.WebApp:', Telegram.WebApp);
-console.log('Dados do usuário:', Telegram.WebApp.initDataUnsafe.user);
+window.addEventListener('telegram-ready', () => {
+    console.log('Telegram.WebApp está pronto!');
+    Telegram.WebApp.ready();
 
-// Verifica se está rodando no Telegram
-const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
+    // Verifica se está rodando no Telegram
+    const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
+
+    if (isTelegram) {
+        console.log('Dados do usuário:', Telegram.WebApp.initDataUnsafe.user);
+    } else {
+        console.error('Telegram.WebApp não está disponível.');
+    }
+
+    // Inicializa o jogo após o Telegram estar pronto
+    initializeGame();
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     const player = window.player || {
@@ -30,19 +40,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para carregar os dados do jogador
     function loadPlayerData(callback) {
-        if (isTelegram) {
+        if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
             // Usa o CloudStorage do Telegram
             Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
-                if (data) {
+                if (err) {
+                    console.error('Erro ao carregar dados do CloudStorage:', err);
+                    callback(null);
+                } else if (data) {
                     callback(JSON.parse(data));
                 } else {
                     callback(null);
                 }
             });
         } else {
-            // Fallback para localStorage (apenas para testes fora do Telegram)
-            const data = localStorage.getItem('playerProgress');
-            callback(data ? JSON.parse(data) : null);
+            console.error('Telegram.WebApp não está disponível.');
+            callback(null);
         }
     }
 
