@@ -1,3 +1,13 @@
+// Verifica se está rodando no Telegram
+const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
+
+// Captura os dados do usuário
+let userData = null;
+if (isTelegram) {
+    userData = Telegram.WebApp.initDataUnsafe.user;
+    console.log('Dados do usuário:', userData);
+}
+
 // Verifica se os dados do jogador já existem no CloudStorage do Telegram
 Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
     if (data) {
@@ -75,6 +85,8 @@ document.querySelector('.select-button').addEventListener('click', () => {
     const playerData = {
         selectedCharacter: selectedCharacter,
         selectedCharacterImage: selectedCharacterImage, // Salva a imagem do personagem
+        playerName: userData ? userData.first_name : 'Jogador', // Salva o nome do jogador
+        playerPhoto: userData ? userData.photo_url : 'imagens/default_profile.png', // Salva a foto do jogador
         level: 1,
         dragonCoins: 0,
         //... outros campos necessários

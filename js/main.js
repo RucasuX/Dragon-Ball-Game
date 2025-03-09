@@ -20,22 +20,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Carrega os dados do jogador
-    loadPlayerData(function(playerData) {
+     // Carrega os dados do jogador
+     loadPlayerData(function(playerData) {
         if (playerData) {
             console.log('Dados do jogador carregados:', playerData);
 
-            // Atualiza os dados do jogador com base no que foi salvo
-            Object.assign(player, playerData);
+            // Atualiza a foto e o nome do jogador
+            const profilePicture = document.getElementById('profile-picture');
+            const playerName = document.getElementById('player-name');
 
-            // Atualiza a interface
-            updateDragonCoins();
-            updateEnergy();
-            updateUpgradeCosts();
-            updatePlayerName();
-            updatePlayerLevel();
-            updatePlayerPower();
-            updateCharacterImage();
+            if (profilePicture) {
+                profilePicture.src = playerData.playerPhoto || 'imagens/default_profile.png';
+            }
+            if (playerName) {
+                playerName.textContent = playerData.playerName || 'Jogador';
+            }
+
+            // Atualiza o personagem escolhido
+            const characterImage = document.getElementById('characterImage');
+            if (characterImage) {
+                characterImage.src = playerData.selectedCharacterImage;
+            }
         } else {
             console.log('Nenhum dado salvo encontrado. Iniciando com valores padrão.');
         }
