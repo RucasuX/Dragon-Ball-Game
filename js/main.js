@@ -261,8 +261,14 @@ window.addEventListener('popstate', () => {
             lastUpdate: Date.now()
         };
     
-        localStorage.setItem('playerProgress', JSON.stringify(saveData));
-        console.log('Progresso salvo:', saveData);
+        // Salva os dados no CloudStorage do Telegram
+        Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(saveData), function(err) {
+            if (err) {
+                console.error('Erro ao salvar progresso:', err);
+            } else {
+                console.log('Progresso salvo com sucesso:', saveData);
+            }
+        });
     }
     
     // Função para atualizar o perfil do jogador
@@ -1044,5 +1050,10 @@ if (profilePicture) {
         }, 200); // 200ms = duração da animação
     });
 }
+
+// Salva o progresso ao fechar a janela
+window.addEventListener('beforeunload', () => {
+    saveProgress();
+});
 
 });
