@@ -59,33 +59,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Carrega os dados do jogador
+// Carrega os dados do jogador
 loadPlayerData(function(playerData) {
     if (playerData) {
         console.log('Dados do jogador carregados:', playerData);
 
-        // Atualiza a foto e o nome do jogador
+        // Atualiza os dados do jogador
+        Object.assign(player, playerData);
+
+        // Atualiza a interface
+        updateDragonCoins();
+        updateEnergy();
+        updateUpgradeCosts();
+        updatePlayerName();
+        updatePlayerLevel();
+        updatePlayerPower();
+
+        // Atualiza foto e nome do jogador
         const profilePicture = document.getElementById('profile-picture');
         const playerName = document.getElementById('player-name');
+        if (profilePicture) profilePicture.src = player.playerPhoto;
+        if (playerName) playerName.textContent = player.playerName;
 
-        if (profilePicture) {
-            profilePicture.src = playerData.playerPhoto || 'imagens/default_profile.png';
-        }
-        if (playerName) {
-            playerName.textContent = playerData.playerName || 'Jogador';
-        }
+        // Inicializa o jogo após carregar os dados
+        loadEnemyState();
+        initializeGame();
 
-        // Atualiza o personagem escolhido
-        const characterImage = document.getElementById('characterImage');
-        if (characterImage) {
-            characterImage.src = playerData.selectedCharacterImage;
-        }
-
-        // Atualiza outros dados do jogador
-        Object.assign(player, playerData);
     } else {
         console.log('Nenhum dado salvo encontrado. Iniciando com valores padrão.');
+        // Inicializa com valores padrão
+        loadEnemyState();
+        initializeGame();
     }
 });
+
+// Mantenha o restante do código abaixo (saveProgress, event listeners, etc)
 
     const punchSound = new Audio('sounds/punch_1.ogg');
     const specialAttackSound = new Audio('sounds/special_attack.mp3');
