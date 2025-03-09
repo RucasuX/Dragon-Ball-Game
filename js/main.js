@@ -228,6 +228,9 @@ window.addEventListener('popstate', () => {
     
                 // Atualiza o nome e a foto do jogador no header
                 updatePlayerProfile();
+    
+                // Atualiza o ranking
+                updateRanking();
             } else {
                 console.error('Nenhum dado do jogador encontrado.');
                 Object.assign(player, defaultData);
@@ -434,16 +437,36 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
     }
 
     // Função para atualizar as informações de um jogador no ranking
-    function updateRankingPlayer(playerData) {
-        const rankingNameElement = document.getElementById('ranking-player-name');
-        const rankingLevelElement = document.getElementById('ranking-player-level');
-        const rankingPowerElement = document.getElementById('ranking-player-power');
-        const rankingRankElement = document.getElementById('ranking-player-rank');
-
-        if (rankingNameElement) rankingNameElement.textContent = playerData.name;
-        if (rankingLevelElement) rankingLevelElement.textContent = `Level: ${playerData.level}`;
-        if (rankingPowerElement) rankingPowerElement.textContent = `Power: ${playerData.power}`;
-        if (rankingRankElement) rankingRankElement.textContent = `Rank: ${playerData.rank}`;
+    function updateRanking() {
+        // Recupera os dados de todos os jogadores do CloudStorage
+        Telegram.WebApp.CloudStorage.getItems(['playerProgress'], function(err, data) {
+            if (err) {
+                console.error('Erro ao carregar dados dos jogadores:', err);
+                return;
+            }
+    
+            // Converte os dados para um array de jogadores
+            const players = Object.values(data).map(item => JSON.parse(item));
+    
+            // Ordena os jogadores pelo power (do maior para o menor)
+            players.sort((a, b) => b.power - a.power);
+    
+            // Atribui um ranking com base na posição no array
+            players.forEach((player, index) => {
+                player.rank = index + 1; // O ranking começa em 1
+            });
+    
+            // Encontra o jogador atual no ranking
+            const currentPlayer = players.find(p => p.playerName === player.playerName);
+    
+            // Atualiza o ranking no header
+            const playerRankElement = document.getElementById('player-rank');
+            if (playerRankElement && currentPlayer) {
+                playerRankElement.textContent = `Rank: ${currentPlayer.rank}`;
+            }
+    
+            console.log('Ranking atualizado:', players);
+        });
     }
 
     // Exemplo de uso
@@ -721,6 +744,7 @@ function defeatEnemy() {
     updatePlayerLevel();
     updatePlayerPower();
     updateCharacterImage();
+    updateRanking();
 
     // Exibe uma mensagem de nível up
     showToast(`Você subiu ${levelsGained} nível! Ganhou ${levelsGained * 500} pontos. Agora está no nível ${player.level}.`);
@@ -884,6 +908,7 @@ function showMessage(message) {
             updateUpgradeCosts();
             updatePlayerLevel(); // Atualiza o nível no modal
             updatePlayerPower(); // Atualiza o poder no modal
+            updateRanking();
             updateCharacterImage(); // Atualiza a imagem e o nome do personagem
     
             // Verifica se o modal está aberto e atualiza a imagem
@@ -909,6 +934,7 @@ function showMessage(message) {
             updateHeader();
             updateDragonCoins();
             updateUpgradeCosts();
+            updateRanking();
             updatePlayerLevel(); // Atualiza o nível no modal
             updatePlayerPower(); // Atualiza o poder no modal
             updateCharacterImage(); // Atualiza a imagem e o nome do personagem
