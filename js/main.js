@@ -2,11 +2,17 @@ window.addEventListener('telegram-ready', () => {
     console.log('Telegram.WebApp está pronto!');
     Telegram.WebApp.ready();
 
-    // Verifica se está rodando no Telegram
     const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
 
     if (isTelegram) {
-        console.log('Dados do usuário:', Telegram.WebApp.initDataUnsafe.user);
+        const user = Telegram.WebApp.initDataUnsafe.user;
+        if (user) {
+            player.playerName = user.first_name || 'Jogador';
+            player.playerPhoto = user.photo_url || 'imagens/default_profile.png';
+            console.log('Dados do usuário:', user);
+        } else {
+            console.error('Dados do usuário não disponíveis.');
+        }
     } else {
         console.error('Telegram.WebApp não está disponível.');
     }
@@ -35,6 +41,35 @@ document.addEventListener('DOMContentLoaded', () => {
         playerPhoto: 'imagens/default_profile.png' // Foto padrão
     };
    
+    // Carrega os dados do jogador
+    loadPlayerData(function(playerData) {
+        if (playerData) {
+            console.log('Dados do jogador carregados:', playerData);
+
+            // Atualiza a foto e o nome do jogador
+            const profilePicture = document.getElementById('profile-picture');
+            const playerName = document.getElementById('player-name');
+
+            if (profilePicture && playerName) {
+                profilePicture.src = playerData.playerPhoto || 'imagens/default_profile.png';
+                playerName.textContent = playerData.playerName || 'Jogador';
+            } else {
+                console.error('Elementos do DOM não encontrados: profile-picture ou player-name');
+            }
+
+            // Atualiza o personagem escolhido
+            const characterImage = document.getElementById('characterImage');
+            if (characterImage) {
+                characterImage.src = playerData.selectedCharacterImage;
+            }
+
+            // Atualiza outros dados do jogador
+            Object.assign(player, playerData);
+        } else {
+            console.log('Nenhum dado salvo encontrado. Iniciando com valores padrão.');
+        }
+    });
+
     // Verifica se está rodando no Telegram
     const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
 
@@ -57,43 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
             callback(null);
         }
     }
-
-    // Carrega os dados do jogador
-// Carrega os dados do jogador
-loadPlayerData(function(playerData) {
-    if (playerData) {
-        console.log('Dados do jogador carregados:', playerData);
-
-        // Atualiza os dados do jogador
-        Object.assign(player, playerData);
-
-        // Atualiza a interface
-        updateDragonCoins();
-        updateEnergy();
-        updateUpgradeCosts();
-        updatePlayerName();
-        updatePlayerLevel();
-        updatePlayerPower();
-
-        // Atualiza foto e nome do jogador
-        const profilePicture = document.getElementById('profile-picture');
-        const playerName = document.getElementById('player-name');
-        if (profilePicture) profilePicture.src = player.playerPhoto;
-        if (playerName) playerName.textContent = player.playerName;
-
-        // Inicializa o jogo após carregar os dados
-        loadEnemyState();
-        initializeGame();
-
-    } else {
-        console.log('Nenhum dado salvo encontrado. Iniciando com valores padrão.');
-        // Inicializa com valores padrão
-        loadEnemyState();
-        initializeGame();
-    }
-});
-
-// Mantenha o restante do código abaixo (saveProgress, event listeners, etc)
 
     const punchSound = new Audio('sounds/punch_1.ogg');
     const specialAttackSound = new Audio('sounds/special_attack.mp3');
@@ -361,8 +359,17 @@ loadPlayerData(function(playerData) {
 
     function updateHeader() {
         const powerElement = document.getElementById('player-power');
+        const playerNameElement = document.getElementById('player-name');
+        const profilePictureElement = document.getElementById('profile-picture');
+    
         if (powerElement) {
-          powerElement.textContent = `Power ${player.power}`;
+            powerElement.textContent = `Power ${player.power}`;
+        }
+        if (playerNameElement) {
+            playerNameElement.textContent = player.playerName || 'Jogador';
+        }
+        if (profilePictureElement) {
+            profilePictureElement.src = player.playerPhoto || 'imagens/default_profile.png';
         }
     }
 
