@@ -194,37 +194,52 @@ window.addEventListener('popstate', () => {
             upgradeEnergyCost: 500,
             power: 0,
             rank: 0,
-            lastUpdate: Date.now()
+            lastUpdate: Date.now(),
+            playerName: 'Jogador', // Nome padrão
+            playerPhoto: 'imagens/default_profile.png' // Foto padrão
         };
     
-        try {
-            const savedData = JSON.parse(localStorage.getItem('playerProgress')) || {};
-            Object.assign(player, defaultData, savedData);
-            
-            // Calcular energia acumulada durante o tempo offline
-            const currentTime = Date.now();
-            const elapsedSeconds = Math.floor((currentTime - player.lastUpdate) / 1000);
-            
-            // Calcular energia máxima que pode ser adicionada
-            const maxPossibleEnergy = player.maxEnergy - player.energy;
-            const energyToAdd = Math.min(elapsedSeconds, maxPossibleEnergy);
-            
-            player.energy += energyToAdd;
-            player.lastUpdate = currentTime; // Atualiza para o momento atual
+        // Carrega os dados do CloudStorage
+        Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
+            if (data) {
+                const savedData = JSON.parse(data);
+                Object.assign(player, defaultData, savedData);
     
-            console.log('Progresso carregado:', player);
-        } catch (error) {
-            console.error('Erro ao carregar progresso:', error);
-            Object.assign(player, defaultData);
-        }
+                // Verifica se o perfil do Telegram mudou
+                const user = Telegram.WebApp.initDataUnsafe.user;
+                if (user) {
+                    // Atualiza o nome e a foto do jogador com os dados do Telegram
+                    player.playerName = user.first_name || 'Jogador';
+                    player.playerPhoto = user.photo_url || 'imagens/default_profile.png';
+                }
     
-        // Atualiza a interface
-        updateDragonCoins();
-        updateEnergy();
-        updateUpgradeCosts();
-        updatePlayerName();
-        updatePlayerLevel();
-        updatePlayerPower();
+                // Calcular energia acumulada durante o tempo offline
+                const currentTime = Date.now();
+                const elapsedSeconds = Math.floor((currentTime - player.lastUpdate) / 1000);
+                
+                // Calcular energia máxima que pode ser adicionada
+                const maxPossibleEnergy = player.maxEnergy - player.energy;
+                const energyToAdd = Math.min(elapsedSeconds, maxPossibleEnergy);
+                
+                player.energy += energyToAdd;
+                player.lastUpdate = currentTime; // Atualiza para o momento atual
+    
+                console.log('Progresso carregado:', player);
+    
+                // Atualiza o nome e a foto do jogador no header
+                updatePlayerProfile();
+            } else {
+                console.error('Nenhum dado do jogador encontrado.');
+                Object.assign(player, defaultData);
+            }
+    
+            // Atualiza a interface
+            updateDragonCoins();
+            updateEnergy();
+            updateUpgradeCosts();
+            updatePlayerLevel();
+            updatePlayerPower();
+        });
     }
        
     function saveProgress() {
@@ -249,6 +264,30 @@ window.addEventListener('popstate', () => {
         localStorage.setItem('playerProgress', JSON.stringify(saveData));
         console.log('Progresso salvo:', saveData);
     }
+    
+    // Função para atualizar o perfil do jogador
+function updatePlayerProfile() {
+    const user = Telegram.WebApp.initDataUnsafe.user;
+    if (user) {
+        // Atualiza o nome e a foto do jogador
+        player.playerName = user.first_name || 'Jogador';
+        player.playerPhoto = user.photo_url || 'imagens/default_profile.png';
+
+        // Atualiza o header
+        const playerNameElement = document.getElementById('player-name');
+        const playerPhotoElement = document.getElementById('profile-picture');
+
+        if (playerNameElement && playerPhotoElement) {
+            playerNameElement.textContent = player.playerName;
+            playerPhotoElement.src = player.playerPhoto;
+        }
+
+        console.log('Perfil do jogador atualizado:', player);
+    }
+}
+
+// Verifica mudanças no perfil do Telegram
+Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
     
     // Substitua o intervalo de energia por este código
     let lastEnergyUpdate = Date.now(); // Armazena o momento da última atualização
