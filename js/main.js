@@ -242,13 +242,13 @@ window.addEventListener('popstate', () => {
         });
     }
        
-    function saveProgress() {
+    async function saveProgress() {
         const saveData = {
             selectedCharacter: player.selectedCharacter,
             baseDamage: player.baseDamage,
             level: player.level,
-            dragonCoins: player.dragonCoins, // Moedas
-            energy: player.energy, // Energia
+            dragonCoins: player.dragonCoins,
+            energy: player.energy,
             maxEnergy: player.maxEnergy,
             specialAttackUses: player.specialAttackUses,
             maxSpecialAttackUses: player.maxSpecialAttackUses,
@@ -259,20 +259,24 @@ window.addEventListener('popstate', () => {
             power: player.power,
             rank: player.rank,
             lastUpdate: Date.now(),
-            playerName: player.playerName, // Nome do jogador
-            playerPhoto: player.playerPhoto // Foto do jogador
+            playerName: player.playerName,
+            playerPhoto: player.playerPhoto
         };
     
         // Salva os dados no CloudStorage do Telegram
-        Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(saveData), function(err) {
-            if (err) {
-                console.error('Erro ao salvar progresso:', err);
-            } else {
-                console.log('Progresso salvo com sucesso:', saveData);
-            }
+        return new Promise((resolve, reject) => {
+            Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(saveData), function(err) {
+                if (err) {
+                    console.error('Erro ao salvar progresso:', err);
+                    reject(err);
+                } else {
+                    console.log('Progresso salvo com sucesso:', saveData);
+                    resolve();
+                }
+            });
         });
     }
-    
+
     // Função para atualizar o perfil do jogador
 function updatePlayerProfile() {
     const user = Telegram.WebApp.initDataUnsafe.user;
@@ -313,22 +317,53 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
         saveProgress();
     });
 
-    function saveEnemyState() {
+    // Função para salvar o estado do inimigo de forma assíncrona
+    async function saveEnemyState() {
         const enemyState = {
-            currentEnemyIndex: currentEnemyIndex, // Salva o índice atual
+            currentEnemyIndex: currentEnemyIndex,
             currentEnemyHealth: enemy.health,
             currentEnemyMaxHealth: enemy.maxHealth
         };
-    
+
         // Salva os dados no CloudStorage do Telegram
-        Telegram.WebApp.CloudStorage.setItem('enemyState', JSON.stringify(enemyState), function(err) {
-            if (err) {
-                console.error('Erro ao salvar estado do inimigo:', err);
-            } else {
-                console.log('Estado do inimigo salvo com sucesso:', enemyState);
-            }
+        return new Promise((resolve, reject) => {
+            Telegram.WebApp.CloudStorage.setItem('enemyState', JSON.stringify(enemyState), function(err) {
+                if (err) {
+                    console.error('Erro ao salvar estado do inimigo:', err);
+                    reject(err);
+                } else {
+                    console.log('Estado do inimigo salvo com sucesso:', enemyState);
+                    resolve();
+                }
+            });
         });
     }
+
+        // Função para salvar todos os dados antes de fechar
+    async function saveAllDataBeforeClose() {
+        try {
+            await saveProgress(); // Salva o progresso do jogador
+            await saveEnemyState(); // Salva o estado do inimigo
+            console.log('Todos os dados foram salvos com sucesso.');
+        } catch (error) {
+            console.error('Erro ao salvar dados antes de fechar:', error);
+        }
+    }
+
+    // Evento para bloquear o fechamento até que os dados sejam salvos
+    window.addEventListener('beforeunload', async (event) => {
+        // Impede o fechamento imediato da janela
+        event.preventDefault();
+
+        // Mostra uma mensagem de confirmação
+        event.returnValue = 'Tem certeza que deseja sair? Todos os dados serão salvos antes de fechar.';
+
+        // Salva todos os dados antes de fechar
+        await saveAllDataBeforeClose();
+
+        // Remove o evento para evitar loops
+        window.removeEventListener('beforeunload', arguments.callee);
+    });
 
     function loadEnemyState() {
         // Carrega os dados do CloudStorage
