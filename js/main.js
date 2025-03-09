@@ -228,9 +228,6 @@ window.addEventListener('popstate', () => {
     
                 // Atualiza o nome e a foto do jogador no header
                 updatePlayerProfile();
-    
-                // Atualiza o ranking
-                updateRanking();
             } else {
                 console.error('Nenhum dado do jogador encontrado.');
                 Object.assign(player, defaultData);
@@ -250,8 +247,8 @@ window.addEventListener('popstate', () => {
             selectedCharacter: player.selectedCharacter,
             baseDamage: player.baseDamage,
             level: player.level,
-            dragonCoins: player.dragonCoins,
-            energy: player.energy,
+            dragonCoins: player.dragonCoins, // Moedas
+            energy: player.energy, // Energia
             maxEnergy: player.maxEnergy,
             specialAttackUses: player.specialAttackUses,
             maxSpecialAttackUses: player.maxSpecialAttackUses,
@@ -262,8 +259,8 @@ window.addEventListener('popstate', () => {
             power: player.power,
             rank: player.rank,
             lastUpdate: Date.now(),
-            playerName: player.playerName, // Salva o nome do jogador
-            playerPhoto: player.playerPhoto // Salva a foto do jogador
+            playerName: player.playerName, // Nome do jogador
+            playerPhoto: player.playerPhoto // Foto do jogador
         };
     
         // Salva os dados no CloudStorage do Telegram
@@ -273,7 +270,7 @@ window.addEventListener('popstate', () => {
             } else {
                 console.log('Progresso salvo com sucesso:', saveData);
             }
-        }); // Faltava este parêntese de fechamento
+        });
     }
     
     // Função para atualizar o perfil do jogador
@@ -640,7 +637,7 @@ updateRankingPlayer(rankingPlayer);
     
         // Atualiza a barra de vida do inimigo
         updateHealthBar();
-        saveProgress();
+        saveProgress(); // Salva o progresso do jogador
     }
 
 let isSpecialAttackInProgress = false; // Controla se o ataque especial está em andamento
@@ -826,6 +823,15 @@ document.querySelector('#clear-storage').addEventListener('click', () => {
                     } else {
                         console.log('Jogo resetado com sucesso:', initialPlayerData);
                         showMessage('Jogo resetado com sucesso. Recarregue a página.');
+
+                        // Reseta a vida e a lista de inimigos
+                        currentEnemyIndex = 0; // Volta para o primeiro inimigo
+                        enemy.health = enemies[currentEnemyIndex].health; // Reseta a vida do inimigo
+                        enemy.maxHealth = enemies[currentEnemyIndex].maxHealth;
+
+                        // Atualiza a interface
+                        updateHealthBar();
+
                         // Recarrega a página para aplicar as mudanças
                         setTimeout(() => {
                             window.location.reload();
