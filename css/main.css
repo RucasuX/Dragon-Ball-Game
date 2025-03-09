@@ -685,7 +685,7 @@ button:active {
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
-  z-index: 2000;
+  z-index: 1001;
 }
 
 .clear-button:hover {
