@@ -92,7 +92,10 @@ document.querySelector('.select-button').addEventListener('click', () => {
         playerPhoto: userData ? userData.photo_url : 'imagens/default_profile.png', // Salva a foto do jogador
         level: 1,
         dragonCoins: 0,
-        //... outros campos necessários
+        energy: 0,
+        maxEnergy: 60,
+        power: 0,
+        rank: 0
     };
 
     // Salva os dados no CloudStorage do Telegram
