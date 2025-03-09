@@ -1,10 +1,15 @@
-// Verifica se os dados do jogador já existem no localStorage
-const playerData = JSON.parse(localStorage.getItem('playerProgress'));
-if (playerData && playerData.selectedCharacter) {
-    console.log('Jogador já escolheu um personagem. Redirecionando para main.html');
-    window.location.href = 'main.html';
-}
+// Verifica se os dados do jogador já existem no CloudStorage do Telegram
+Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
+    if (data) {
+        const playerData = JSON.parse(data);
+        if (playerData.selectedCharacter) {
+            console.log('Jogador já escolheu um personagem. Redirecionando para main.html');
+            window.location.href = 'main.html';
+        }
+    }
+});
 
+// Lista de personagens disponíveis
 const characters = [
     { title: "Goku", image: "imagens/1goku_1.png" },
     { title: "Gohan", image: "imagens/1gohan_1.png" },
@@ -16,6 +21,7 @@ let currentCharacterIndex = 0;
 const characterImage = document.querySelector('.character-image');
 const characterName = document.querySelector('.character-name');
 
+// Função para atualizar o personagem exibido com animação
 function updateCharacter(direction) {
     // Aplica a animação de saída
     if (direction === 'left') {
@@ -48,29 +54,39 @@ function updateCharacter(direction) {
     }, 300); // Duração da animação de saída
 }
 
+// Evento para o botão de navegação à esquerda
 document.querySelector('.side-button.left').addEventListener('click', () => {
     currentCharacterIndex = (currentCharacterIndex - 1 + characters.length) % characters.length;
     updateCharacter('left');
 });
 
+// Evento para o botão de navegação à direita
 document.querySelector('.side-button.right').addEventListener('click', () => {
     currentCharacterIndex = (currentCharacterIndex + 1) % characters.length;
     updateCharacter('right');
-
 });
 
-// No arquivo da tela de seleção de personagens
+// Evento para o botão de seleção de personagem
 document.querySelector('.select-button').addEventListener('click', () => {
     const selectedCharacter = characters[currentCharacterIndex].title;
-    
+    const selectedCharacterImage = characters[currentCharacterIndex].image;
+
+    // Cria o objeto com os dados do jogador
     const playerData = {
         selectedCharacter: selectedCharacter,
+        selectedCharacterImage: selectedCharacterImage, // Salva a imagem do personagem
         level: 1,
         dragonCoins: 0,
         //... outros campos necessários
     };
 
-    console.log('Dados salvos:', playerData); // Depuração
-    localStorage.setItem('playerProgress', JSON.stringify(playerData));
-    window.location.href = 'main.html';
+    // Salva os dados no CloudStorage do Telegram
+    Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(playerData), function(err) {
+        if (err) {
+            console.error('Erro ao salvar os dados:', err);
+        } else {
+            console.log('Dados salvos com sucesso:', playerData);
+            window.location.href = 'main.html'; // Redireciona para a tela principal
+        }
+    });
 });
