@@ -718,15 +718,52 @@ function defeatEnemy() {
 
 // Evento para o botão de limpeza de dados
 document.querySelector('#clear-storage').addEventListener('click', () => {
-    Telegram.WebApp.CloudStorage.removeItem('playerProgress', function(err) {
-        if (err) {
-            console.error('Erro ao limpar os dados:', err);
-            showError('Erro ao limpar os dados. Tente novamente.');
-        } else {
-            console.log('Dados do jogador removidos com sucesso.');
-            showMessage('Dados do jogador foram limpos. Recarregue a página.');
-        }
-    });
+    // Confirmação para evitar reset acidental
+    const confirmReset = confirm('Tem certeza que deseja resetar o jogo? Todos os dados serão perdidos.');
+    if (confirmReset) {
+        // Remove os dados do CloudStorage
+        Telegram.WebApp.CloudStorage.removeItem('playerProgress', function(err) {
+            if (err) {
+                console.error('Erro ao limpar os dados:', err);
+                showError('Erro ao resetar o jogo. Tente novamente.');
+            } else {
+                console.log('Dados do jogador removidos com sucesso.');
+
+                // Define os valores iniciais do jogo
+                const initialPlayerData = {
+                    selectedCharacter: characters[0].title, // Personagem padrão
+                    selectedCharacterImage: characters[0].image, // Imagem do personagem padrão
+                    playerName: userData ? userData.first_name : 'Jogador', // Nome do jogador
+                    playerPhoto: userData ? userData.photo_url : 'imagens/default_profile.png', // Foto do jogador
+                    level: 1,
+                    dragonCoins: 0,
+                    energy: 0,
+                    maxEnergy: 60,
+                    power: 0,
+                    rank: 0,
+                    enemyData: { // Dados do inimigo resetados
+                        health: 100,
+                        power: 10
+                    }
+                };
+
+                // Salva os dados iniciais no CloudStorage
+                Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(initialPlayerData), function(err) {
+                    if (err) {
+                        console.error('Erro ao salvar dados iniciais:', err);
+                        showError('Erro ao salvar dados iniciais. Tente novamente.');
+                    } else {
+                        console.log('Jogo resetado com sucesso:', initialPlayerData);
+                        showMessage('Jogo resetado com sucesso. Recarregue a página.');
+                        // Recarrega a página para aplicar as mudanças
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }
+                });
+            }
+        });
+    }
 });
 
 // Função para mostrar uma mensagem de sucesso
