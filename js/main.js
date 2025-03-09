@@ -916,22 +916,36 @@ function defeatEnemy() {
         }
     }
 
+    window.addEventListener('telegram-ready', () => {
+        console.log('Telegram.WebApp está pronto!');
+        initializeGame(); // Inicializa o jogo após o Telegram estar pronto
+    });
+
     // Inicializar o jogo
     function initializeGame() {
-        loadEnemyState(); // Carrega o estado do inimigo salvo
+        // Inicializa o WebApp
+        Telegram.WebApp.ready();
     
-        const firstEnemy = enemies[currentEnemyIndex];
-        // enemy.health = firstEnemy.health; // REMOVA OU COMENTE
-        // enemy.maxHealth = firstEnemy.maxHealth; // REMOVA OU COMENTE
+        // Carrega os dados do jogador do CloudStorage
+        Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
+            if (err) {
+                console.error('Erro ao carregar dados do CloudStorage:', err);
+            } else if (data) {
+                const playerData = JSON.parse(data);
+                console.log('Dados do jogador carregados:', playerData);
     
-        const enemyImage = document.querySelector('.enemy-image');
-        if (enemyImage) enemyImage.src = firstEnemy.image;
+                // Atualiza a interface com os dados do jogador
+                const profilePicture = document.getElementById('profile-picture');
+                const playerName = document.getElementById('player-name');
     
-        const backgroundImage = document.getElementById('backgroundImage');
-        if (backgroundImage) backgroundImage.src = firstEnemy.background;
-    
-        updateHealthBar();
-    }
+                if (profilePicture) {
+                    profilePicture.src = playerData.playerPhoto || 'imagens/default_profile.png';
+                }
+                if (playerName) {
+                    playerName.textContent = playerData.playerName || 'Jogador';
+                }
+            }
+        });
 
     loadProgress(); // Carrega o progresso do jogador
     loadEnemyState(); // Carrega o estado do inimigo ANTES de inicializar o jogo
