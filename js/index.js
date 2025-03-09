@@ -27,6 +27,9 @@ const characters = [
     { title: "Trunks", image: "imagens/1trunks_1.png" }
 ];
 
+console.log('Telegram.WebApp:', Telegram.WebApp);
+console.log('Dados do usuário:', Telegram.WebApp.initDataUnsafe.user);
+
 let currentCharacterIndex = 0;
 const characterImage = document.querySelector('.character-image');
 const characterName = document.querySelector('.character-name');
