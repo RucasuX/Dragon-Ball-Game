@@ -1,5 +1,9 @@
 Telegram.WebApp.ready();
-console.log('Script carregado com sucesso!');
+console.log('Telegram.WebApp:', Telegram.WebApp);
+console.log('Dados do usuário:', Telegram.WebApp.initDataUnsafe.user);
+
+// Verifica se está rodando no Telegram
+const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
 
 document.addEventListener('DOMContentLoaded', () => {
     const player = window.player || {
