@@ -916,36 +916,39 @@ function defeatEnemy() {
         }
     }
 
-    window.addEventListener('telegram-ready', () => {
-        console.log('Telegram.WebApp está pronto!');
-        initializeGame(); // Inicializa o jogo após o Telegram estar pronto
-    });
-
     // Inicializar o jogo
     function initializeGame() {
-        // Inicializa o WebApp
-        Telegram.WebApp.ready();
+        // 1. Carrega o estado do inimigo salvo
+        loadEnemyState();
     
-        // Carrega os dados do jogador do CloudStorage
-        Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
-            if (err) {
-                console.error('Erro ao carregar dados do CloudStorage:', err);
-            } else if (data) {
-                const playerData = JSON.parse(data);
-                console.log('Dados do jogador carregados:', playerData);
+        // 2. Verifica se o índice do inimigo atual é válido
+        if (currentEnemyIndex < 0 || currentEnemyIndex >= enemies.length) {
+            console.error('Índice do inimigo inválido. Redefinindo para o primeiro inimigo.');
+            currentEnemyIndex = 0; // Define um valor padrão
+        }
     
-                // Atualiza a interface com os dados do jogador
-                const profilePicture = document.getElementById('profile-picture');
-                const playerName = document.getElementById('player-name');
+        // 3. Obtém o inimigo atual
+        const currentEnemy = enemies[currentEnemyIndex];
     
-                if (profilePicture) {
-                    profilePicture.src = playerData.playerPhoto || 'imagens/default_profile.png';
-                }
-                if (playerName) {
-                    playerName.textContent = playerData.playerName || 'Jogador';
-                }
-            }
-        });
+        // 4. Atualiza a imagem do inimigo
+        const enemyImage = document.querySelector('.enemy-image');
+        if (enemyImage && currentEnemy.image) {
+            enemyImage.src = currentEnemy.image;
+        } else {
+            console.error('Imagem do inimigo não encontrada ou elemento não existe.');
+        }
+    
+        // 5. Atualiza o fundo
+        const backgroundImage = document.getElementById('backgroundImage');
+        if (backgroundImage && currentEnemy.background) {
+            backgroundImage.src = currentEnemy.background;
+        } else {
+            console.error('Fundo não encontrado ou elemento não existe.');
+        }
+    
+        // 6. Atualiza a barra de vida
+        updateHealthBar();
+    }
 
     loadProgress(); // Carrega o progresso do jogador
     loadEnemyState(); // Carrega o estado do inimigo ANTES de inicializar o jogo
