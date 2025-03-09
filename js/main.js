@@ -270,7 +270,7 @@ window.addEventListener('popstate', () => {
             } else {
                 console.log('Progresso salvo com sucesso:', saveData);
             }
-        };
+        }); // Faltava este parêntese de fechamento
     }
     
     // Função para atualizar o perfil do jogador
