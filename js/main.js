@@ -1,20 +1,45 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const playerData = JSON.parse(localStorage.getItem('playerProgress'));
-    console.log('Progresso carregado:', playerData); // Log que você compartilhou
+    // Verifica se está rodando no Telegram
+    const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
 
-    if (!playerData || !playerData.selectedCharacter) {
-        console.log('Redirecionando para index.html'); // Verifique se essa mensagem aparece
-        window.location.href = 'index.html';
+    // Função para carregar os dados do jogador
+    function loadPlayerData(callback) {
+        if (isTelegram) {
+            // Usa o CloudStorage do Telegram
+            Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
+                if (data) {
+                    callback(JSON.parse(data));
+                } else {
+                    callback(null);
+                }
+            });
+        } else {
+            // Fallback para localStorage (apenas para testes fora do Telegram)
+            const data = localStorage.getItem('playerProgress');
+            callback(data ? JSON.parse(data) : null);
+        }
     }
 
-    
-window.addEventListener('popstate', () => {
-    const playerData = JSON.parse(localStorage.getItem('playerProgress'));
-    if (playerData) {
-        // Se houver dados, redireciona para main.html
-        window.location.href = 'main.html';
-    }
-});
+    // Carrega os dados do jogador
+    loadPlayerData(function(playerData) {
+        if (playerData) {
+            console.log('Dados do jogador carregados:', playerData);
+
+            // Atualiza os dados do jogador com base no que foi salvo
+            Object.assign(player, playerData);
+
+            // Atualiza a interface
+            updateDragonCoins();
+            updateEnergy();
+            updateUpgradeCosts();
+            updatePlayerName();
+            updatePlayerLevel();
+            updatePlayerPower();
+            updateCharacterImage();
+        } else {
+            console.log('Nenhum dado salvo encontrado. Iniciando com valores padrão.');
+        }
+    });
 
     const player = window.player || {
         baseDamage: 1,
@@ -1073,8 +1098,23 @@ window.addEventListener('popstate', () => {
             lastUpdate: Date.now()
         };
     
-        localStorage.setItem('playerProgress', JSON.stringify(saveData));
-        console.log('Progresso salvo:', saveData);
+        // Verifica se está rodando no Telegram
+        const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
+    
+        if (isTelegram) {
+            // Salva no CloudStorage do Telegram
+            Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(saveData), function(err) {
+                if (err) {
+                    console.error('Erro ao salvar os dados:', err);
+                } else {
+                    console.log('Dados salvos com sucesso no Telegram:', saveData);
+                }
+            });
+        } else {
+            // Fallback para localStorage (apenas para testes fora do Telegram)
+            localStorage.setItem('playerProgress', JSON.stringify(saveData));
+            console.log('Dados salvos com sucesso no localStorage:', saveData);
+        }
     }
     
     // Substitua o intervalo de energia por este código
