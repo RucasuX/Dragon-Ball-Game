@@ -319,23 +319,34 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
             currentEnemyHealth: enemy.health,
             currentEnemyMaxHealth: enemy.maxHealth
         };
-        localStorage.setItem('enemyState', JSON.stringify(enemyState));
-        console.log('Estado do inimigo salvo:', enemyState);
+    
+        // Salva os dados no CloudStorage do Telegram
+        Telegram.WebApp.CloudStorage.setItem('enemyState', JSON.stringify(enemyState), function(err) {
+            if (err) {
+                console.error('Erro ao salvar estado do inimigo:', err);
+            } else {
+                console.log('Estado do inimigo salvo com sucesso:', enemyState);
+            }
+        });
     }
 
     function loadEnemyState() {
-        const enemyState = JSON.parse(localStorage.getItem('enemyState'));
-        if (enemyState) {
-            currentEnemyIndex = enemyState.currentEnemyIndex;
-            enemy.health = enemyState.currentEnemyHealth;
-            enemy.maxHealth = enemyState.currentEnemyMaxHealth;
-            console.log('Estado do inimigo carregado:', enemyState); // Log para depuração
-        } else {
-            currentEnemyIndex = 0;
-            enemy.health = enemies[currentEnemyIndex].health;
-            enemy.maxHealth = enemies[currentEnemyIndex].maxHealth;
-            console.log('Nenhum estado salvo. Iniciando com o primeiro inimigo.'); // Log para depuração
-        }
+        // Carrega os dados do CloudStorage
+        Telegram.WebApp.CloudStorage.getItem('enemyState', function(err, data) {
+            if (data) {
+                const enemyState = JSON.parse(data);
+                currentEnemyIndex = enemyState.currentEnemyIndex;
+                enemy.health = enemyState.currentEnemyHealth;
+                enemy.maxHealth = enemyState.currentEnemyMaxHealth;
+                console.log('Estado do inimigo carregado:', enemyState);
+            } else {
+                // Se não houver dados, define os valores iniciais
+                currentEnemyIndex = 0;
+                enemy.health = enemies[currentEnemyIndex].health;
+                enemy.maxHealth = enemies[currentEnemyIndex].maxHealth;
+                console.log('Nenhum estado salvo. Iniciando com o primeiro inimigo.');
+            }
+        });
     }
 
     // Atualizar Dragon Coins na interface
