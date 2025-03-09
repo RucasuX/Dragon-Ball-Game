@@ -339,12 +339,18 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
                 enemy.health = enemyState.currentEnemyHealth;
                 enemy.maxHealth = enemyState.currentEnemyMaxHealth;
                 console.log('Estado do inimigo carregado:', enemyState);
+    
+                // Atualiza a barra de vida do inimigo
+                updateHealthBar(); // Adicione esta linha
             } else {
                 // Se não houver dados, define os valores iniciais
                 currentEnemyIndex = 0;
                 enemy.health = enemies[currentEnemyIndex].health;
                 enemy.maxHealth = enemies[currentEnemyIndex].maxHealth;
                 console.log('Nenhum estado salvo. Iniciando com o primeiro inimigo.');
+    
+                // Atualiza a barra de vida do inimigo
+                updateHealthBar(); // Adicione esta linha
             }
         });
     }
@@ -786,34 +792,46 @@ function defeatEnemy() {
 });
 
 // Evento para o botão de limpeza de dados
-document.querySelector('#clear-storage').addEventListener('click', () => {
+document.querySelector('#clear-storage')?.addEventListener('click', () => {
     // Confirmação para evitar reset acidental
     const confirmReset = confirm('Tem certeza que deseja resetar o jogo? Todos os dados serão perdidos.');
     if (confirmReset) {
-        // Remove os dados do CloudStorage
+        // Remove os dados do jogador do CloudStorage
         Telegram.WebApp.CloudStorage.removeItem('playerProgress', function(err) {
             if (err) {
-                console.error('Erro ao limpar os dados:', err);
+                console.error('Erro ao limpar os dados do jogador:', err);
                 showError('Erro ao resetar o jogo. Tente novamente.');
             } else {
                 console.log('Dados do jogador removidos com sucesso.');
 
+                // Remove o estado do inimigo do CloudStorage
+                Telegram.WebApp.CloudStorage.removeItem('enemyState', function(err) {
+                    if (err) {
+                        console.error('Erro ao limpar o estado do inimigo:', err);
+                    } else {
+                        console.log('Estado do inimigo removido com sucesso.');
+                    }
+                });
+
                 // Define os valores iniciais do jogo
                 const initialPlayerData = {
-                    selectedCharacter: characters[0].title, // Personagem padrão
-                    selectedCharacterImage: characters[0].image, // Imagem do personagem padrão
-                    playerName: userData ? userData.first_name : 'Jogador', // Nome do jogador
-                    playerPhoto: userData ? userData.photo_url : 'imagens/default_profile.png', // Foto do jogador
+                    selectedCharacter: 'Gohan', // Personagem padrão
+                    playerName: 'Jogador', // Nome padrão
+                    playerPhoto: 'imagens/default_profile.png', // Foto padrão
+                    baseDamage: 1,
                     level: 1,
                     dragonCoins: 0,
                     energy: 0,
                     maxEnergy: 60,
+                    specialAttackUses: 5,
+                    maxSpecialAttackUses: 5,
+                    lastSpecialAttackUse: 0,
+                    upgradeAttackCost: 100,
+                    upgradeSpecialCost: 100,
+                    upgradeEnergyCost: 50,
                     power: 0,
                     rank: 0,
-                    enemyData: { // Dados do inimigo resetados
-                        health: 100,
-                        power: 10
-                    }
+                    lastUpdate: Date.now()
                 };
 
                 // Salva os dados iniciais no CloudStorage
