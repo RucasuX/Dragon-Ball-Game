@@ -22,6 +22,23 @@ window.addEventListener('telegram-ready', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    const playerData = JSON.parse(localStorage.getItem('playerProgress'));
+    console.log('Progresso carregado:', playerData); // Log que você compartilhou
+
+    if (!playerData || !playerData.selectedCharacter) {
+        console.log('Redirecionando para index.html'); // Verifique se essa mensagem aparece
+        window.location.href = 'index.html';
+    }
+
+    
+window.addEventListener('popstate', () => {
+    const playerData = JSON.parse(localStorage.getItem('playerProgress'));
+    if (playerData) {
+        // Se houver dados, redireciona para main.html
+        window.location.href = 'main.html';
+    }
+});
+
     const player = window.player || {
         baseDamage: 1,
         level: 1,
@@ -36,73 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
         upgradeEnergyCost: 50,
         power: 0,
         rank: 0,
-        selectedCharacter: 'Gohan', // Valor padrão
-        playerName: 'Jogador', // Nome padrão
-        playerPhoto: 'imagens/default_profile.png' // Foto padrão
+        selectedCharacter: 'Gohan' // Valor padrão
     };
-   
-    // Carrega os dados do jogador
-    loadPlayerData(function(playerData) {
-        if (playerData) {
-            console.log('Dados do jogador carregados:', playerData);
-    
-            // Atualiza a foto e o nome do jogador
-            const profilePicture = document.getElementById('profile-picture');
-            const playerName = document.getElementById('player-name');
-    
-            if (profilePicture && playerName) {
-                profilePicture.src = playerData.playerPhoto || 'imagens/default_profile.png';
-                playerName.textContent = playerData.playerName || 'Jogador';
-            } else {
-                console.error('Elementos do DOM não encontrados: profile-picture ou player-name');
-            }
-    
-            // Atualiza outros dados do jogador
-            Object.assign(player, playerData);
-    
-            // Atualiza o header
-            updateHeader();
-        } else {
-            console.log('Nenhum dado salvo encontrado. Iniciando com valores padrão.');
-        }
-    });
-
-    // Verifica se está rodando no Telegram
-    const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
-
-    // Função para carregar os dados do jogador
-    function loadPlayerData(callback) {
-        if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-            // Usa o CloudStorage do Telegram
-            Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
-                if (err) {
-                    console.error('Erro ao carregar dados do CloudStorage:', err);
-                    callback(null);
-                } else if (data) {
-                    const playerData = JSON.parse(data);
-                    console.log('Dados do jogador carregados:', playerData); // Log para depuração
-    
-                    // Atualiza a foto e o nome do jogador
-                    const profilePicture = document.getElementById('profile-picture');
-                    const playerName = document.getElementById('player-name');
-    
-                    if (profilePicture && playerName) {
-                        profilePicture.src = playerData.playerPhoto || 'imagens/default_profile.png';
-                        playerName.textContent = playerData.playerName || 'Jogador';
-                    } else {
-                        console.error('Elementos do DOM não encontrados: profile-picture ou player-name');
-                    }
-    
-                    callback(playerData);
-                } else {
-                    callback(null);
-                }
-            });
-        } else {
-            console.error('Telegram.WebApp não está disponível.');
-            callback(null);
-        }
-    }
 
     const punchSound = new Audio('sounds/punch_1.ogg');
     const specialAttackSound = new Audio('sounds/special_attack.mp3');
@@ -247,22 +199,20 @@ document.addEventListener('DOMContentLoaded', () => {
     
         try {
             const savedData = JSON.parse(localStorage.getItem('playerProgress')) || {};
-            console.log('Dados carregados do localStorage:', savedData); // Log para depuração
             Object.assign(player, defaultData, savedData);
-    
+            
             // Calcular energia acumulada durante o tempo offline
             const currentTime = Date.now();
             const elapsedSeconds = Math.floor((currentTime - player.lastUpdate) / 1000);
-    
+            
             // Calcular energia máxima que pode ser adicionada
             const maxPossibleEnergy = player.maxEnergy - player.energy;
             const energyToAdd = Math.min(elapsedSeconds, maxPossibleEnergy);
-    
+            
             player.energy += energyToAdd;
             player.lastUpdate = currentTime; // Atualiza para o momento atual
     
             console.log('Progresso carregado:', player);
-            console.log('Energia carregada:', player.energy); // Log para depuração
         } catch (error) {
             console.error('Erro ao carregar progresso:', error);
             Object.assign(player, defaultData);
@@ -297,26 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     
         localStorage.setItem('playerProgress', JSON.stringify(saveData));
-        console.log('Progresso salvo:', saveData); // Log para depuração
-    }
-    
-        // Verifica se está rodando no Telegram
-        const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
-    
-        if (isTelegram) {
-            // Salva no CloudStorage do Telegram
-            Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(saveData), function(err) {
-                if (err) {
-                    console.error('Erro ao salvar os dados:', err);
-                } else {
-                    console.log('Dados salvos com sucesso no Telegram:', saveData);
-                }
-            });
-        } else {
-            // Fallback para localStorage (apenas para testes fora do Telegram)
-            localStorage.setItem('playerProgress', JSON.stringify(saveData));
-            console.log('Dados salvos com sucesso no localStorage:', saveData);
-        }
+        console.log('Progresso salvo:', saveData);
     }
     
     // Substitua o intervalo de energia por este código
@@ -368,27 +299,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (upgradeDragonCoinsElement) upgradeDragonCoinsElement.textContent = player.dragonCoins;
     }
 
+    // Atualizar Energia na interface
     function updateEnergy() {
         const energyElement = document.getElementById('player-energy');
-        if (energyElement) {
-            energyElement.textContent = player.energy;
-            console.log('Energia atualizada na interface:', player.energy); // Log para depuração
-        }
+        if (energyElement) energyElement.textContent = player.energy;
     }
 
     function updateHeader() {
         const powerElement = document.getElementById('player-power');
-        const playerNameElement = document.getElementById('player-name');
-        const profilePictureElement = document.getElementById('profile-picture');
-    
         if (powerElement) {
-            powerElement.textContent = `Power ${player.power}`;
-        }
-        if (playerNameElement) {
-            playerNameElement.textContent = player.playerName || 'Jogador';
-        }
-        if (profilePictureElement) {
-            profilePictureElement.src = player.playerPhoto || 'imagens/default_profile.png';
+          powerElement.textContent = `Power ${player.power}`;
         }
     }
 
@@ -440,8 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updatePlayerName() {
         const playerNameElement = document.getElementById('player-name'); // Elemento do nome no header
         if (playerNameElement) {
-            // Exibe o nome do jogador, não o nome do personagem
-            playerNameElement.textContent = player.playerName || 'Jogador';
+            playerNameElement.textContent = player.selectedCharacter; // Atualiza o nome do personagem
         }
     }
 
@@ -964,35 +883,18 @@ function defeatEnemy() {
 
     // Inicializar o jogo
     function initializeGame() {
-        // 1. Carrega o estado do inimigo salvo
-        loadEnemyState();
+        loadEnemyState(); // Carrega o estado do inimigo salvo
     
-        // 2. Verifica se o índice do inimigo atual é válido
-        if (currentEnemyIndex < 0 || currentEnemyIndex >= enemies.length) {
-            console.error('Índice do inimigo inválido. Redefinindo para o primeiro inimigo.');
-            currentEnemyIndex = 0; // Define um valor padrão
-        }
+        const firstEnemy = enemies[currentEnemyIndex];
+        // enemy.health = firstEnemy.health; // REMOVA OU COMENTE
+        // enemy.maxHealth = firstEnemy.maxHealth; // REMOVA OU COMENTE
     
-        // 3. Obtém o inimigo atual
-        const currentEnemy = enemies[currentEnemyIndex];
-    
-        // 4. Atualiza a imagem do inimigo
         const enemyImage = document.querySelector('.enemy-image');
-        if (enemyImage && currentEnemy.image) {
-            enemyImage.src = currentEnemy.image;
-        } else {
-            console.error('Imagem do inimigo não encontrada ou elemento não existe.');
-        }
+        if (enemyImage) enemyImage.src = firstEnemy.image;
     
-        // 5. Atualiza o fundo
         const backgroundImage = document.getElementById('backgroundImage');
-        if (backgroundImage && currentEnemy.background) {
-            backgroundImage.src = currentEnemy.background;
-        } else {
-            console.error('Fundo não encontrado ou elemento não existe.');
-        }
+        if (backgroundImage) backgroundImage.src = firstEnemy.background;
     
-        // 6. Atualiza a barra de vida
         updateHealthBar();
     }
 

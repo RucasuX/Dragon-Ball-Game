@@ -1,16 +1,11 @@
+// Inicializa o Telegram WebApp
 Telegram.WebApp.ready();
 console.log('Telegram.WebApp:', Telegram.WebApp);
 console.log('Dados do usuário:', Telegram.WebApp.initDataUnsafe.user);
 
-// Verifica se está rodando no Telegram
-const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
-
 // Captura os dados do usuário
-let userData = null;
-if (isTelegram) {
-    userData = Telegram.WebApp.initDataUnsafe.user;
-    console.log('Dados do usuário:', userData);
-}
+const userData = Telegram.WebApp.initDataUnsafe.user;
+console.log('Dados do usuário:', userData);
 
 // Verifica se os dados do jogador já existem no CloudStorage do Telegram
 Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
@@ -99,13 +94,39 @@ document.querySelector('.select-button').addEventListener('click', () => {
         rank: 0
     };
 
+    // Mostrar um spinner ou mensagem de carregamento
+    showLoadingIndicator();
+
     // Salva os dados no CloudStorage do Telegram
     Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(playerData), function(err) {
         if (err) {
             console.error('Erro ao salvar os dados:', err);
+            // Mostrar uma mensagem de erro ao usuário
+            showError('Erro ao salvar os dados. Tente novamente.');
         } else {
             console.log('Dados salvos com sucesso:', playerData);
             window.location.href = 'main.html'; // Redireciona para a tela principal
         }
     });
 });
+
+// Função para mostrar um indicador de carregamento
+function showLoadingIndicator() {
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'loading-indicator';
+    loadingIndicator.textContent = 'Salvando dados...';
+    document.body.appendChild(loadingIndicator);
+}
+
+// Função para mostrar uma mensagem de erro
+function showError(message) {
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'error-message';
+    errorMessage.textContent = message;
+    document.body.appendChild(errorMessage);
+
+    // Remove a mensagem de erro após alguns segundos
+    setTimeout(() => {
+        errorMessage.remove();
+    }, 5000);
+}
