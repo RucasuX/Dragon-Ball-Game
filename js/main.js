@@ -33,33 +33,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const gameData = JSON.parse(data);
             console.log('Dados do jogo carregados:', gameData);
 
-            // Verifica se o jogador já escolheu um personagem
-            if (!gameData.player || !gameData.player.selectedCharacter) {
-                console.log('Redirecionando para index.html');
-                window.location.href = 'index.html';
-            } else {
-                // Atualiza os dados do jogador
-                if (gameData.player) {
-                    Object.assign(player, gameData.player);
-                    console.log('Dados do jogador atualizados:', player);
-                } else {
-                    console.error('Dados do jogador não encontrados.');
-                }
+            // Atualiza os dados do jogador
+            if (gameData.player) {
+                Object.assign(player, gameData.player);
+                console.log('Dados do jogador carregados:', player);
 
-                // Atualiza os dados do inimigo
-                if (gameData.enemy) {
-                    currentEnemyIndex = gameData.enemy.currentEnemyIndex;
-                    enemy.health = gameData.enemy.currentEnemyHealth;
-                    enemy.maxHealth = gameData.enemy.currentEnemyMaxHealth;
-                    console.log('Dados do inimigo atualizados:', gameData.enemy);
-                } else {
-                    console.error('Dados do inimigo não encontrados.');
-                }
+                // Atualiza o header (foto e nome do jogador)
+                updatePlayerProfile();
+                updateDragonCoins();
+                updateEnergy();
+            } else {
+                console.error('Dados do jogador não encontrados.');
+            }
+
+            // Atualiza os dados do inimigo
+            if (gameData.enemy) {
+                currentEnemyIndex = gameData.enemy.currentEnemyIndex;
+                enemy.health = gameData.enemy.currentEnemyHealth;
+                enemy.maxHealth = gameData.enemy.currentEnemyMaxHealth;
+                console.log('Dados do inimigo carregados:', gameData.enemy);
+            } else {
+                console.error('Dados do inimigo não encontrados.');
             }
         } else {
             console.log('Nenhum dado encontrado. Redirecionando para index.html');
             window.location.href = 'index.html';
         }
+
+        // Inicializa o jogo após carregar os dados
+        initializeGame();
     });
 
     const player = window.player || {
@@ -278,25 +280,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Função para atualizar o perfil do jogador
-function updatePlayerProfile() {
-    const user = Telegram.WebApp.initDataUnsafe.user;
-    if (user) {
-        // Atualiza o nome e a foto do jogador
-        player.playerName = user.first_name || 'Jogador';
-        player.playerPhoto = user.photo_url || 'imagens/default_profile.png';
-
-        // Atualiza o header
+    function updatePlayerProfile() {
         const playerNameElement = document.getElementById('player-name');
         const playerPhotoElement = document.getElementById('profile-picture');
-
+    
         if (playerNameElement && playerPhotoElement) {
+            // Atualiza o nome do jogador
             playerNameElement.textContent = player.playerName;
+    
+            // Atualiza a foto do jogador
             playerPhotoElement.src = player.playerPhoto;
+        } else {
+            console.error('Elementos do header não encontrados.');
         }
-
-        console.log('Perfil do jogador atualizado:', player);
     }
-}
 
 // Verifica mudanças no perfil do Telegram
 Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
@@ -345,15 +342,21 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
     // Atualizar Dragon Coins na interface
     function updateDragonCoins() {
         const dragonCoinsElement = document.getElementById('player-coins');
-        const upgradeDragonCoinsElement = document.getElementById('upgrade-player-coins');
-        if (dragonCoinsElement) dragonCoinsElement.textContent = player.dragonCoins;
-        if (upgradeDragonCoinsElement) upgradeDragonCoinsElement.textContent = player.dragonCoins;
+        if (dragonCoinsElement) {
+            dragonCoinsElement.textContent = player.dragonCoins;
+        } else {
+            console.error('Elemento de Dragon Coins não encontrado.');
+        }
     }
 
     // Atualizar Energia na interface
     function updateEnergy() {
         const energyElement = document.getElementById('player-energy');
-        if (energyElement) energyElement.textContent = player.energy;
+        if (energyElement) {
+            energyElement.textContent = player.energy;
+        } else {
+            console.error('Elemento de Energia não encontrado.');
+        }
     }
 
     function updateHeader() {
@@ -1001,20 +1004,24 @@ function showMessage(message) {
     }
 
    // Inicializar o jogo
-function initializeGame() {
-    // Dados do inimigo já foram carregados pela loadGameData, então não precisamos carregá-los novamente
+   function initializeGame() {
+    // Atualiza a imagem do inimigo e o fundo da batalha
     const firstEnemy = enemies[currentEnemyIndex];
-
-    // Atualiza a imagem do inimigo
     const enemyImage = document.querySelector('.enemy-image');
-    if (enemyImage) enemyImage.src = firstEnemy.image;
-
-    // Atualiza o fundo da batalha
     const backgroundImage = document.getElementById('backgroundImage');
-    if (backgroundImage) backgroundImage.src = firstEnemy.background;
+
+    if (enemyImage && backgroundImage) {
+        enemyImage.src = firstEnemy.image;
+        backgroundImage.src = firstEnemy.background;
+    }
 
     // Atualiza a barra de vida do inimigo
     updateHealthBar();
+
+    // Atualiza o header (foto, nome, moedas, energia)
+    updatePlayerProfile();
+    updateDragonCoins();
+    updateEnergy();
 }
 
     loadGameData(); // Carrega o progresso do jogador
