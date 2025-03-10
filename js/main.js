@@ -22,27 +22,22 @@ window.addEventListener('telegram-ready', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Carrega os dados do Cloud Storage do Telegram
-    Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
-        if (err) {
-            console.error('Erro ao carregar progresso:', err);
-            return;
-        }
+    const playerData = JSON.parse(localStorage.getItem('playerProgress'));
+    console.log('Progresso carregado:', playerData); // Log que você compartilhou
 
-        if (data) {
-            const playerData = JSON.parse(data);
-            console.log('Progresso carregado:', playerData);
+    if (!playerData || !playerData.selectedCharacter) {
+        console.log('Redirecionando para index.html'); // Verifique se essa mensagem aparece
+        window.location.href = 'index.html';
+    }
 
-            // Verifica se o personagem foi selecionado
-            if (!playerData.selectedCharacter) {
-                console.log('Redirecionando para index.html');
-                window.location.href = 'index.html';
-            }
-        } else {
-            console.log('Nenhum progresso salvo. Iniciando novo jogo.');
-            window.location.href = 'index.html';
-        }
-    });
+    
+window.addEventListener('popstate', () => {
+    const playerData = JSON.parse(localStorage.getItem('playerProgress'));
+    if (playerData) {
+        // Se houver dados, redireciona para main.html
+        window.location.href = 'main.html';
+    }
+});
 
     const player = window.player || {
         baseDamage: 1,
@@ -184,119 +179,104 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentEnemyIndex = 0;
 
     function loadProgress() {
-        // Valores padrão para novo jogo
         const defaultData = {
-            player: {
-                selectedCharacter: 'Gohan',
-                baseDamage: 1,
-                level: 1,
-                dragonCoins: 0,
-                energy: 0,
-                maxEnergy: 60,
-                specialAttackUses: 5,
-                maxSpecialAttackUses: 5,
-                lastSpecialAttackUse: 0,
-                upgradeAttackCost: 100,
-                upgradeSpecialCost: 100,
-                upgradeEnergyCost: 50,
-                power: 0,
-                rank: 0,
-                lastUpdate: Date.now(),
-                playerName: 'Jogador',
-                playerPhoto: 'imagens/default_profile.png'
-            },
-            enemy: {
-                currentEnemyIndex: 0,
-                health: enemies[0].health,
-                maxHealth: enemies[0].maxHealth
-            }
+            selectedCharacter: 'Gohan',
+            baseDamage: 1,
+            level: 1,
+            dragonCoins: 0,
+            energy: 0,
+            maxEnergy: 60,
+            specialAttackUses: 1,
+            maxSpecialAttackUses: 1,
+            lastSpecialAttackUse: 0,
+            upgradeAttackCost: 1000,
+            upgradeSpecialCost: 1000,
+            upgradeEnergyCost: 500,
+            power: 0,
+            rank: 0,
+            lastUpdate: Date.now(),
+            playerName: 'Jogador', // Nome padrão
+            playerPhoto: 'imagens/default_profile.png' // Foto padrão
         };
     
-        Telegram.WebApp.CloudStorage.getItem('gameState', function(err, data) {
-            if (err) {
-                console.error('Erro ao carregar:', err);
-                return;
-            }
-    
+        // Carrega os dados do CloudStorage
+        Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
             if (data) {
-                try {
-                    const savedData = JSON.parse(data);
-                    
-                    // Carrega dados do jogador
-                    Object.assign(player, defaultData.player, savedData.player);
-                    
-                    // Carrega dados do inimigo
-                    currentEnemyIndex = savedData.enemy.currentEnemyIndex || 0;
-                    enemy.health = savedData.enemy.health || enemies[currentEnemyIndex].health;
-                    enemy.maxHealth = savedData.enemy.maxHealth || enemies[currentEnemyIndex].maxHealth;
+                const savedData = JSON.parse(data);
+                Object.assign(player, defaultData, savedData);
     
-                    // Atualiza energia acumulada
-                    const tempoOffline = Math.floor((Date.now() - player.lastUpdate) / 1000);
-                    player.energy = Math.min(player.energy + tempoOffline, player.maxEnergy);
-                    player.lastUpdate = Date.now();
-    
-                    console.log('Progresso carregado:', { player, enemy });
-    
-                } catch (error) {
-                    console.error('Erro ao analisar dados:', error);
-                    Object.assign(player, defaultData.player);
-                    Object.assign(enemy, defaultData.enemy);
+                // Verifica se o perfil do Telegram mudou
+                const user = Telegram.WebApp.initDataUnsafe.user;
+                if (user) {
+                    // Atualiza o nome e a foto do jogador com os dados do Telegram
+                    player.playerName = user.first_name || 'Jogador';
+                    player.playerPhoto = user.photo_url || 'imagens/default_profile.png';
                 }
+    
+                // Calcular energia acumulada durante o tempo offline
+                const currentTime = Date.now();
+                const elapsedSeconds = Math.floor((currentTime - player.lastUpdate) / 1000);
+                
+                // Calcular energia máxima que pode ser adicionada
+                const maxPossibleEnergy = player.maxEnergy - player.energy;
+                const energyToAdd = Math.min(elapsedSeconds, maxPossibleEnergy);
+                
+                player.energy += energyToAdd;
+                player.lastUpdate = currentTime; // Atualiza para o momento atual
+    
+                console.log('Progresso carregado:', player);
+    
+                // Atualiza o nome e a foto do jogador no header
+                updatePlayerProfile();
             } else {
-                console.log('Nenhum save encontrado, usando dados padrão');
-                Object.assign(player, defaultData.player);
-                Object.assign(enemy, defaultData.enemy);
+                console.error('Nenhum dado do jogador encontrado.');
+                Object.assign(player, defaultData);
             }
     
-            // Atualiza interface
+            // Atualiza a interface
             updateDragonCoins();
             updateEnergy();
             updateUpgradeCosts();
             updatePlayerLevel();
             updatePlayerPower();
-            updateCharacterImage();
-            updateHealthBar();
-            updateRankingPlayer();
         });
     }
        
-    function saveProgress() {
+    async function saveProgress() {
         const saveData = {
-            player: {
-                selectedCharacter: player.selectedCharacter,
-                baseDamage: player.baseDamage,
-                level: player.level,
-                dragonCoins: player.dragonCoins,
-                energy: player.energy,
-                maxEnergy: player.maxEnergy,
-                specialAttackUses: player.specialAttackUses,
-                maxSpecialAttackUses: player.maxSpecialAttackUses,
-                lastSpecialAttackUse: player.lastSpecialAttackUse,
-                upgradeAttackCost: player.upgradeAttackCost,
-                upgradeSpecialCost: player.upgradeSpecialCost,
-                upgradeEnergyCost: player.upgradeEnergyCost,
-                power: player.power,
-                rank: player.rank,
-                lastUpdate: Date.now(),
-                playerName: player.playerName,
-                playerPhoto: player.playerPhoto
-            },
-            enemy: {
-                currentEnemyIndex: currentEnemyIndex,
-                health: enemy.health,
-                maxHealth: enemy.maxHealth
-            }
+            selectedCharacter: player.selectedCharacter,
+            baseDamage: player.baseDamage,
+            level: player.level,
+            dragonCoins: player.dragonCoins,
+            energy: player.energy,
+            maxEnergy: player.maxEnergy,
+            specialAttackUses: player.specialAttackUses,
+            maxSpecialAttackUses: player.maxSpecialAttackUses,
+            lastSpecialAttackUse: player.lastSpecialAttackUse,
+            upgradeAttackCost: player.upgradeAttackCost,
+            upgradeSpecialCost: player.upgradeSpecialCost,
+            upgradeEnergyCost: player.upgradeEnergyCost,
+            power: player.power,
+            rank: player.rank,
+            lastUpdate: Date.now(),
+            playerName: player.playerName,
+            playerPhoto: player.playerPhoto
         };
     
-        Telegram.WebApp.CloudStorage.setItem('gameState', JSON.stringify(saveData), function(err) {
-            if (err) {
-                console.error('Erro ao salvar:', err);
-            } else {
-                console.log('Jogo salvo com sucesso:', saveData);
-            }
+        // Salva os dados no CloudStorage do Telegram
+        return new Promise((resolve, reject) => {
+            Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(saveData), function(err) {
+                if (err) {
+                    console.error('Erro ao salvar progresso:', err);
+                    reject(err);
+                } else {
+                    console.log('Progresso salvo com sucesso:', saveData);
+                    resolve();
+                }
+            });
         });
     }
-    
+
     // Função para atualizar o perfil do jogador
 function updatePlayerProfile() {
     const user = Telegram.WebApp.initDataUnsafe.user;
@@ -337,7 +317,88 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
         saveProgress();
     });
 
-        // Atualizar Energia na interface
+    // Função para salvar o estado do inimigo de forma assíncrona
+    async function saveEnemyState() {
+        const enemyState = {
+            currentEnemyIndex: currentEnemyIndex,
+            currentEnemyHealth: enemy.health,
+            currentEnemyMaxHealth: enemy.maxHealth
+        };
+
+        // Salva os dados no CloudStorage do Telegram
+        return new Promise((resolve, reject) => {
+            Telegram.WebApp.CloudStorage.setItem('enemyState', JSON.stringify(enemyState), function(err) {
+                if (err) {
+                    console.error('Erro ao salvar estado do inimigo:', err);
+                    reject(err);
+                } else {
+                    console.log('Estado do inimigo salvo com sucesso:', enemyState);
+                    resolve();
+                }
+            });
+        });
+    }
+
+        // Função para salvar todos os dados antes de fechar
+    async function saveAllDataBeforeClose() {
+        try {
+            await saveProgress(); // Salva o progresso do jogador
+            await saveEnemyState(); // Salva o estado do inimigo
+            console.log('Todos os dados foram salvos com sucesso.');
+        } catch (error) {
+            console.error('Erro ao salvar dados antes de fechar:', error);
+        }
+    }
+
+    // Evento para bloquear o fechamento até que os dados sejam salvos
+    window.addEventListener('beforeunload', async (event) => {
+        // Impede o fechamento imediato da janela
+        event.preventDefault();
+
+        // Mostra uma mensagem de confirmação
+        event.returnValue = 'Tem certeza que deseja sair? Todos os dados serão salvos antes de fechar.';
+
+        // Salva todos os dados antes de fechar
+        await saveAllDataBeforeClose();
+
+        // Remove o evento para evitar loops
+        window.removeEventListener('beforeunload', arguments.callee);
+    });
+
+    function loadEnemyState() {
+        // Carrega os dados do CloudStorage
+        Telegram.WebApp.CloudStorage.getItem('enemyState', function(err, data) {
+            if (data) {
+                const enemyState = JSON.parse(data);
+                currentEnemyIndex = enemyState.currentEnemyIndex;
+                enemy.health = enemyState.currentEnemyHealth;
+                enemy.maxHealth = enemyState.currentEnemyMaxHealth;
+                console.log('Estado do inimigo carregado:', enemyState);
+    
+                // Atualiza a barra de vida do inimigo
+                updateHealthBar(); // Adicione esta linha
+            } else {
+                // Se não houver dados, define os valores iniciais
+                currentEnemyIndex = 0;
+                enemy.health = enemies[currentEnemyIndex].health;
+                enemy.maxHealth = enemies[currentEnemyIndex].maxHealth;
+                console.log('Nenhum estado salvo. Iniciando com o primeiro inimigo.');
+    
+                // Atualiza a barra de vida do inimigo
+                updateHealthBar(); // Adicione esta linha
+            }
+        });
+    }
+
+    // Atualizar Dragon Coins na interface
+    function updateDragonCoins() {
+        const dragonCoinsElement = document.getElementById('player-coins');
+        const upgradeDragonCoinsElement = document.getElementById('upgrade-player-coins');
+        if (dragonCoinsElement) dragonCoinsElement.textContent = player.dragonCoins;
+        if (upgradeDragonCoinsElement) upgradeDragonCoinsElement.textContent = player.dragonCoins;
+    }
+
+    // Atualizar Energia na interface
     function updateEnergy() {
         const energyElement = document.getElementById('player-energy');
         if (energyElement) energyElement.textContent = player.energy;
@@ -425,27 +486,37 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
     }
 
     // Função para atualizar as informações de um jogador no ranking
-    function updateRankingPlayer(playerData) {
-        const rankingNameElement = document.getElementById('ranking-player-name');
-        const rankingLevelElement = document.getElementById('ranking-player-level');
-        const rankingPowerElement = document.getElementById('ranking-player-power');
-        const rankingRankElement = document.getElementById('ranking-player-rank');
-
-        if (rankingNameElement) rankingNameElement.textContent = playerData.name;
-        if (rankingLevelElement) rankingLevelElement.textContent = `Level: ${playerData.level}`;
-        if (rankingPowerElement) rankingPowerElement.textContent = `Power: ${playerData.power}`;
-        if (rankingRankElement) rankingRankElement.textContent = `Rank: ${playerData.rank}`;
+    function updateRanking() {
+        // Recupera os dados de todos os jogadores do CloudStorage
+        Telegram.WebApp.CloudStorage.getItems(['playerProgress'], function(err, data) {
+            if (err) {
+                console.error('Erro ao carregar dados dos jogadores:', err);
+                return;
+            }
+    
+            // Converte os dados para um array de jogadores
+            const players = Object.values(data).map(item => JSON.parse(item));
+    
+            // Ordena os jogadores pelo power (do maior para o menor)
+            players.sort((a, b) => b.power - a.power);
+    
+            // Atribui um ranking com base na posição no array
+            players.forEach((player, index) => {
+                player.rank = index + 1; // O ranking começa em 1
+            });
+    
+            // Encontra o jogador atual no ranking
+            const currentPlayer = players.find(p => p.playerName === player.playerName);
+    
+            // Atualiza o ranking no header
+            const playerRankElement = document.getElementById('player-rank');
+            if (playerRankElement && currentPlayer) {
+                playerRankElement.textContent = `Rank: ${currentPlayer.rank}`;
+            }
+    
+            console.log('Ranking atualizado:', players);
+        });
     }
-
-    // Exemplo de uso
-    const rankingPlayer = {
-        name: "JogadorRanking10000",
-        level: 150,
-        power: 50000,
-        rank: 2
-    };
-
-updateRankingPlayer(rankingPlayer);
 
     // Gerar energia a cada segundo
     setInterval(() => {
@@ -553,80 +624,62 @@ updateRankingPlayer(rankingPlayer);
         updateHealthBar();
 
         // Salva o estado do inimigo
-        saveProgress();
+        saveEnemyState();
         console.log('Próximo inimigo:', nextEnemy.name);
     }
 
     function attackEnemy(event) {
-        console.log('[DEBUG] Attack event triggered'); // Debug 1
-        
-        // Verifica se os elementos existem
         const upgradeModal = document.getElementById('upgradeModal');
         const rewardModal = document.getElementById('rewardModal');
-        if (!upgradeModal || !rewardModal) {
-            console.error('Elementos modais não encontrados!');
+    
+        // Verifica se algum modal está aberto
+        if (
+            (upgradeModal && upgradeModal.classList.contains('active')) ||
+            (rewardModal && rewardModal.style.display === 'block')
+        ) {
             return;
         }
     
-        // Verificação de modais aberto com debug
-        const modalAberto = [upgradeModal, rewardModal].some(modal => 
-            modal.classList.contains('active') || 
-            modal.style.display === 'block'
-        );
-        console.log(`[DEBUG] Modal aberto: ${modalAberto}`); // Debug 2
-        if (modalAberto) return;
-    
-        // Verificação de energia com debug
-        console.log(`[DEBUG] Energia antes: ${player.energy}`); // Debug 3
+        // Verifica se o jogador tem energia para atacar
         if (player.energy < 1) {
-            console.log('[DEBUG] Energia insuficiente para ataque');
-            return;
+            return; // Simplesmente retorna sem fazer nada
         }
     
-        try {
-            // Sistema de dano
-            const damage = calculateDamage();
-            const effectiveDamage = Math.min(damage, enemy.health);
-            console.log(`[DEBUG] Dano calculado: ${damage} | Efetivo: ${effectiveDamage}`); // Debug 4
+        // Toca o som de soco
+        punchSound.currentTime = 0; // Reinicia o som se já estiver tocando
+        punchSound.play();
     
-            // Atualização de recursos
-            player.dragonCoins += effectiveDamage;
-            enemy.health -= effectiveDamage;
-            player.energy = Math.max(player.energy - 1, 0);
-            console.log(`[DEBUG] Pós-ataque - Energia: ${player.energy} Moedas: ${player.dragonCoins}`); // Debug 5
+        // Executa o ataque
+        const damage = calculateDamage();
+        const effectiveDamage = Math.min(damage, enemy.health); // Dano efetivo (não pode ser maior que a vida restante do inimigo)
+        enemy.health -= effectiveDamage;
+        saveEnemyState(); // Salva o estado do inimigo
+        player.dragonCoins += effectiveDamage; // Ganha moedas com base no dano efetivo
+        player.energy -= 1;
+        updateEnergy();
+        updateDragonCoins();
     
-            // Atualizações visuais
-            updateDragonCoins();
-            updateEnergy();
-            updateHealthBar();
+        // Mostra o número de dano flutuante
+        showDamageNumber(damage, event.clientX, event.clientY);
     
-            // Feedback de ataque
-            const enemyImage = document.querySelector('.enemy-image');
-            if (enemyImage) {
-                enemyImage.classList.add('enemy-shake');
-                enemyImage.style.transform = 'scale(1.05)';
-                setTimeout(() => {
-                    enemyImage.classList.remove('enemy-shake');
-                    enemyImage.style.transform = 'scale(1)';
-                }, 200);
-            }
-    
-            // Números de dano
-            showDamageNumber(effectiveDamage, event.clientX, event.clientY);
-    
-            // Verificação de morte do inimigo
-            if (enemy.health <= 0) {
-                console.log('[DEBUG] Inimigo derrotado');
-                enemy.health = 0;
-                defeatEnemy();
-            }
-    
-            // Salvamento (versão unificada)
-            saveProgress();
-    
-        } catch (error) {
-            console.error('[ERRO] Falha no ataque:', error);
+        // Animação de shake no inimigo
+        const enemyImage = document.querySelector('.enemy-image');
+        if (enemyImage) {
+            enemyImage.classList.add('enemy-shake');
+            setTimeout(() => {
+                enemyImage.classList.remove('enemy-shake');
+            }, 200);
         }
+    
+        // Verifica se o inimigo foi derrotado
+        if (enemy.health <= 0) {
+            enemy.health = 0;
+            defeatEnemy(); // Chama a função de derrota do inimigo
+        }
+    
+        // Atualiza a barra de vida do inimigo
+        updateHealthBar();
+        saveProgress(); // Salva o progresso do jogador
     }
 
 let isSpecialAttackInProgress = false; // Controla se o ataque especial está em andamento
@@ -663,7 +716,7 @@ function specialAttack() {
             const damage = player.baseDamage * energyUsed;
 
             enemy.health -= damage;
-            saveProgress(); // Salva o estado do inimigo
+            saveEnemyState(); // Salva o estado do inimigo
             player.specialAttackUses -= 1; // Diminui os usos de ataque especial
             player.lastSpecialAttackUse = now;
             updateHealthBar();
@@ -730,6 +783,7 @@ function defeatEnemy() {
     updatePlayerLevel();
     updatePlayerPower();
     updateCharacterImage();
+    updateRanking();
 
     // Exibe uma mensagem de nível up
     showToast(`Você subiu ${levelsGained} nível! Ganhou ${levelsGained * 500} pontos. Agora está no nível ${player.level}.`);
@@ -773,34 +827,46 @@ function defeatEnemy() {
 });
 
 // Evento para o botão de limpeza de dados
-document.querySelector('#clear-storage').addEventListener('click', () => {
+document.querySelector('#clear-storage')?.addEventListener('click', () => {
     // Confirmação para evitar reset acidental
     const confirmReset = confirm('Tem certeza que deseja resetar o jogo? Todos os dados serão perdidos.');
     if (confirmReset) {
-        // Remove os dados do CloudStorage
+        // Remove os dados do jogador do CloudStorage
         Telegram.WebApp.CloudStorage.removeItem('playerProgress', function(err) {
             if (err) {
-                console.error('Erro ao limpar os dados:', err);
+                console.error('Erro ao limpar os dados do jogador:', err);
                 showError('Erro ao resetar o jogo. Tente novamente.');
             } else {
                 console.log('Dados do jogador removidos com sucesso.');
 
+                // Remove o estado do inimigo do CloudStorage
+                Telegram.WebApp.CloudStorage.removeItem('enemyState', function(err) {
+                    if (err) {
+                        console.error('Erro ao limpar o estado do inimigo:', err);
+                    } else {
+                        console.log('Estado do inimigo removido com sucesso.');
+                    }
+                });
+
                 // Define os valores iniciais do jogo
                 const initialPlayerData = {
-                    selectedCharacter: characters[0].title, // Personagem padrão
-                    selectedCharacterImage: characters[0].image, // Imagem do personagem padrão
-                    playerName: userData ? userData.first_name : 'Jogador', // Nome do jogador
-                    playerPhoto: userData ? userData.photo_url : 'imagens/default_profile.png', // Foto do jogador
+                    selectedCharacter: 'Gohan', // Personagem padrão
+                    playerName: 'Jogador', // Nome padrão
+                    playerPhoto: 'imagens/default_profile.png', // Foto padrão
+                    baseDamage: 1,
                     level: 1,
                     dragonCoins: 0,
                     energy: 0,
                     maxEnergy: 60,
+                    specialAttackUses: 5,
+                    maxSpecialAttackUses: 5,
+                    lastSpecialAttackUse: 0,
+                    upgradeAttackCost: 100,
+                    upgradeSpecialCost: 100,
+                    upgradeEnergyCost: 50,
                     power: 0,
                     rank: 0,
-                    enemyData: { // Dados do inimigo resetados
-                        health: 100,
-                        power: 10
-                    }
+                    lastUpdate: Date.now()
                 };
 
                 // Salva os dados iniciais no CloudStorage
@@ -811,6 +877,15 @@ document.querySelector('#clear-storage').addEventListener('click', () => {
                     } else {
                         console.log('Jogo resetado com sucesso:', initialPlayerData);
                         showMessage('Jogo resetado com sucesso. Recarregue a página.');
+
+                        // Reseta a vida e a lista de inimigos
+                        currentEnemyIndex = 0; // Volta para o primeiro inimigo
+                        enemy.health = enemies[currentEnemyIndex].health; // Reseta a vida do inimigo
+                        enemy.maxHealth = enemies[currentEnemyIndex].maxHealth;
+
+                        // Atualiza a interface
+                        updateHealthBar();
+
                         // Recarrega a página para aplicar as mudanças
                         setTimeout(() => {
                             window.location.reload();
@@ -871,7 +946,7 @@ function showMessage(message) {
         }
     
         updateHealthBar();
-        saveProgress();
+        saveEnemyState();
         
         console.log('Estado do inimigo salvo:', {
             currentEnemyIndex,
@@ -893,6 +968,7 @@ function showMessage(message) {
             updateUpgradeCosts();
             updatePlayerLevel(); // Atualiza o nível no modal
             updatePlayerPower(); // Atualiza o poder no modal
+            updateRanking();
             updateCharacterImage(); // Atualiza a imagem e o nome do personagem
     
             // Verifica se o modal está aberto e atualiza a imagem
@@ -918,6 +994,7 @@ function showMessage(message) {
             updateHeader();
             updateDragonCoins();
             updateUpgradeCosts();
+            updateRanking();
             updatePlayerLevel(); // Atualiza o nível no modal
             updatePlayerPower(); // Atualiza o poder no modal
             updateCharacterImage(); // Atualiza a imagem e o nome do personagem
@@ -1002,23 +1079,23 @@ function showMessage(message) {
 
     // Inicializar o jogo
     function initializeGame() {
+        loadEnemyState(); // Carrega o estado do inimigo salvo
+    
+        const firstEnemy = enemies[currentEnemyIndex];
+        // enemy.health = firstEnemy.health; // REMOVA OU COMENTE
+        // enemy.maxHealth = firstEnemy.maxHealth; // REMOVA OU COMENTE
+    
         const enemyImage = document.querySelector('.enemy-image');
+        if (enemyImage) enemyImage.src = firstEnemy.image;
+    
         const backgroundImage = document.getElementById('backgroundImage');
-    
-        // Carrega dados do inimigo atual baseado no índice
-        const currentEnemy = enemies[currentEnemyIndex];
-        
-        if (enemyImage) enemyImage.src = currentEnemy.image;
-        if (backgroundImage) backgroundImage.src = currentEnemy.background;
-    
-        // Respeita dados carregados do inimigo
-        enemy.health = currentEnemy.health;
-        enemy.maxHealth = currentEnemy.maxHealth;
+        if (backgroundImage) backgroundImage.src = firstEnemy.background;
     
         updateHealthBar();
     }
 
     loadProgress(); // Carrega o progresso do jogador
+    loadEnemyState(); // Carrega o estado do inimigo ANTES de inicializar o jogo
     initializeGame(); // Inicializa o jogo
     
     const profilePicture = document.getElementById('profile-picture');
@@ -1065,12 +1142,6 @@ if (profilePicture) {
 // Salva o progresso ao fechar a janela
 window.addEventListener('beforeunload', () => {
     saveProgress();
-    
-    // Garante o salvamento imediato
-    Telegram.WebApp.sendData(JSON.stringify({
-        action: 'save',
-        timestamp: Date.now()
-    }));
 });
 
 });
