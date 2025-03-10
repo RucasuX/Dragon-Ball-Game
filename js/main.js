@@ -1070,7 +1070,51 @@ function showMessage(message) {
         // Configura a regeneração de energia
         handleEnergyRegeneration();
     }
-   
+
+    // Função unificada para regeneração de energia
+    function handleEnergyRegeneration() {
+        // Verifica se há dados salvos e calcula a energia regenerada offline
+        function loadEnergy() {
+            Telegram.WebApp.CloudStorage.getItem('gameData', function(err, data) {
+                if (err) {
+                    console.error('Erro ao carregar dados do jogo:', err);
+                    return;
+                }
+
+                if (data) {
+                    const gameData = JSON.parse(data);
+
+                    // Calcula o tempo passado desde a última atualização
+                    const now = Date.now();
+                    const lastUpdate = gameData.player.lastUpdate || now;
+                    const timePassed = now - lastUpdate; // Tempo em milissegundos
+
+                    // Calcula a energia regenerada com base no tempo passado
+                    const energyRegenerated = Math.floor(timePassed / 1000); // 1 energia por segundo
+                    player.energy = Math.min(player.energy + energyRegenerated, player.maxEnergy);
+
+                    console.log('Energia regenerada offline:', energyRegenerated);
+                    updateEnergy(); // Atualiza a interface
+                }
+            });
+        }
+
+        // Regenera a energia durante o jogo
+        function regenerateEnergy() {
+            if (player.energy < player.maxEnergy) {
+                player.energy += 1; // Adiciona 1 ponto de energia
+                updateEnergy(); // Atualiza a interface
+                saveGameData(); // Salva o progresso
+            }
+        }
+
+        // Carrega a energia regenerada offline ao iniciar o jogo
+        loadEnergy();
+
+        // Inicia a regeneração de energia durante o jogo
+        setInterval(regenerateEnergy, 1000); // 1 energia por segundo
+    }
+
     // Carrega os dados do jogo e inicializa
     loadGameData(); // Carrega o progresso do jogador
     initializeGame(); // Inicializa o jogo
