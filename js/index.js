@@ -1,5 +1,3 @@
-import enemies from './enemies.js';
-
 // Inicializa o Telegram WebApp
 Telegram.WebApp.ready();
 console.log('Telegram.WebApp:', Telegram.WebApp);
@@ -103,11 +101,13 @@ document.querySelector('.select-button').addEventListener('click', () => {
         lastUpdate: Date.now()
     };
 
-    // Dados iniciais do inimigo
+    // Dados iniciais do inimigo (valores padrão)
     const enemyData = {
-        currentEnemyIndex: 0,
-        currentEnemyHealth: enemies[0].health, // Usa a lista de inimigos importada
-        currentEnemyMaxHealth: enemies[0].maxHealth // Usa a lista de inimigos importada
+        currentEnemyIndex: 0, // Índice do primeiro inimigo
+        currentEnemyHealth: 1000, // Vida inicial
+        currentEnemyMaxHealth: 1000, // Vida máxima inicial
+        currentEnemyImage: "imagens/raditz.png", // Imagem inicial
+        currentEnemyBackground: "imagens/1_bg.jpg" // Fundo inicial
     };
 
     // Cria o objeto gameData unificado
