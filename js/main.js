@@ -756,7 +756,7 @@ document.querySelector('#clear-storage')?.addEventListener('click', () => {
     const confirmReset = confirm('Tem certeza que deseja resetar o jogo? Todos os dados serão perdidos.');
     if (confirmReset) {
         // Remove os dados do jogador do CloudStorage
-        Telegram.WebApp.CloudStorage.removeItem('playerProgress', function(err) {
+        Telegram.WebApp.CloudStorage.removeItem('gameData', function(err) {
             if (err) {
                 console.error('Erro ao limpar os dados do jogador:', err);
                 showError('Erro ao resetar o jogo. Tente novamente.');
@@ -781,7 +781,7 @@ document.querySelector('#clear-storage')?.addEventListener('click', () => {
                     level: 1,
                     dragonCoins: 0,
                     energy: 0,
-                    maxEnergy: 60,
+                    maxEnergy: 0,
                     specialAttackUses: 5,
                     maxSpecialAttackUses: 5,
                     lastSpecialAttackUse: 0,
