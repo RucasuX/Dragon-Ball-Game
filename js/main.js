@@ -203,6 +203,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentEnemyIndex = 0;
 
+    function handleEnergyRegeneration() {
+        // Verifica se há dados salvos e calcula a energia regenerada offline
+        function loadEnergy() {
+            Telegram.WebApp.CloudStorage.getItem('gameData', function(err, data) {
+                if (err) {
+                    console.error('Erro ao carregar dados do jogo:', err);
+                    return;
+                }
+    
+                if (data) {
+                    const gameData = JSON.parse(data);
+    
+                    // Calcula o tempo passado desde a última atualização
+                    const now = Date.now();
+                    const lastUpdate = gameData.player.lastUpdate || now;
+                    const timePassed = now - lastUpdate; // Tempo em milissegundos
+    
+                    // Calcula a energia regenerada com base no tempo passado
+                    const energyRegenerated = Math.floor(timePassed / 1000); // 1 energia por segundo
+                    player.energy = Math.min(player.energy + energyRegenerated, player.maxEnergy);
+    
+                    console.log('Energia regenerada offline:', energyRegenerated);
+                    updateEnergy(); // Atualiza a interface
+                }
+            });
+        }
+    
+        // Regenera a energia durante o jogo
+        function regenerateEnergy() {
+            if (player.energy < player.maxEnergy) {
+                player.energy += 1; // Adiciona 1 ponto de energia
+                updateEnergy(); // Atualiza a interface
+                saveGameData(); // Salva o progresso
+            }
+        }
+    
+        // Carrega a energia regenerada offline ao iniciar o jogo
+        loadEnergy();
+    
+        // Inicia a regeneração de energia durante o jogo
+        setInterval(regenerateEnergy, 1000); // 1 energia por segundo
+    }
+
     function loadGameData() {
         Telegram.WebApp.CloudStorage.getItem('gameData', function(err, data) {
             if (err) {
@@ -310,18 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Verifica mudanças no perfil do Telegram
 Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
-    
-    // Substitua o intervalo de energia por este código
-    let lastEnergyUpdate = Date.now(); // Armazena o momento da última atualização
-
-    function updateEnergyOverTime() {
-        if (player.energy < player.maxEnergy) {
-            player.energy += 1; // Adiciona 1 ponto de energia
-            updateEnergy(); // Atualiza a interface
-            saveGameData(); // Salva o progresso
-        }
-    }
-        
+           
     // Adicione este listener para salvar ao fechar a janela
     window.addEventListener('beforeunload', () => {
         saveGameData();
@@ -485,15 +517,7 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
             console.log('Ranking atualizado:', players);
         });
     }
-
-    // Gerar energia a cada segundo
-    setInterval(() => {
-        if (player.energy < player.maxEnergy) {
-            player.energy += 1;
-            updateEnergy();
-        }
-    }, 1000);
-
+   
     function calculateDamage() {
         return player.baseDamage; // Retorna apenas o dano base
     }
@@ -1022,42 +1046,92 @@ function showMessage(message) {
         }
     }
 
-   // Inicializar o jogo
-   function initializeGame() {
-    // Atualiza a imagem do inimigo e o fundo da batalha
-    const firstEnemy = enemies[currentEnemyIndex];
-    const enemyImage = document.querySelector('.enemy-image');
-    const backgroundImage = document.getElementById('backgroundImage');
+  
+    // Inicializar o jogo
+    function initializeGame() {
+        // Atualiza a imagem do inimigo e o fundo da batalha
+        const firstEnemy = enemies[currentEnemyIndex];
+        const enemyImage = document.querySelector('.enemy-image');
+        const backgroundImage = document.getElementById('backgroundImage');
 
-    if (enemyImage && backgroundImage) {
-        enemyImage.src = firstEnemy.image;
-        backgroundImage.src = firstEnemy.background;
+        if (enemyImage && backgroundImage) {
+            enemyImage.src = firstEnemy.image;
+            backgroundImage.src = firstEnemy.background;
+        }
+
+        // Atualiza a barra de vida do inimigo
+        updateHealthBar();
+
+        // Atualiza o header (foto, nome, moedas, energia)
+        updatePlayerProfile();
+        updateDragonCoins();
+        updateEnergy();
+
+        // Configura a regeneração de energia
+        handleEnergyRegeneration();
     }
 
-    // Atualiza a barra de vida do inimigo
-    updateHealthBar();
+    // Função unificada para regeneração de energia
+    function handleEnergyRegeneration() {
+        // Verifica se há dados salvos e calcula a energia regenerada offline
+        function loadEnergy() {
+            Telegram.WebApp.CloudStorage.getItem('gameData', function(err, data) {
+                if (err) {
+                    console.error('Erro ao carregar dados do jogo:', err);
+                    return;
+                }
 
-    // Atualiza o header (foto, nome, moedas, energia)
-    updatePlayerProfile();
-    updateDragonCoins();
-    updateEnergy();
-}
+                if (data) {
+                    const gameData = JSON.parse(data);
 
+                    // Calcula o tempo passado desde a última atualização
+                    const now = Date.now();
+                    const lastUpdate = gameData.player.lastUpdate || now;
+                    const timePassed = now - lastUpdate; // Tempo em milissegundos
+
+                    // Calcula a energia regenerada com base no tempo passado
+                    const energyRegenerated = Math.floor(timePassed / 1000); // 1 energia por segundo
+                    player.energy = Math.min(player.energy + energyRegenerated, player.maxEnergy);
+
+                    console.log('Energia regenerada offline:', energyRegenerated);
+                    updateEnergy(); // Atualiza a interface
+                }
+            });
+        }
+
+        // Regenera a energia durante o jogo
+        function regenerateEnergy() {
+            if (player.energy < player.maxEnergy) {
+                player.energy += 1; // Adiciona 1 ponto de energia
+                updateEnergy(); // Atualiza a interface
+                saveGameData(); // Salva o progresso
+            }
+        }
+
+        // Carrega a energia regenerada offline ao iniciar o jogo
+        loadEnergy();
+
+        // Inicia a regeneração de energia durante o jogo
+        setInterval(regenerateEnergy, 1000); // 1 energia por segundo
+    }
+
+    // Carrega os dados do jogo e inicializa
     loadGameData(); // Carrega o progresso do jogador
     initializeGame(); // Inicializa o jogo
-    
-    const profilePicture = document.getElementById('profile-picture');
-if (profilePicture) {
-    profilePicture.addEventListener('click', () => {
-        // Adiciona a animação de clique
-        profilePicture.style.animation = 'buttonClick 0.2s ease';
 
-        // Redireciona após a animação terminar
-        setTimeout(() => {
-            window.location.href = 'leaderboard.html';
-        }, 200); // 200ms = duração da animação
-    });
-}
+    // Evento para o clique na foto do perfil
+    const profilePicture = document.getElementById('profile-picture');
+    if (profilePicture) {
+        profilePicture.addEventListener('click', () => {
+            // Adiciona a animação de clique
+            profilePicture.style.animation = 'buttonClick 0.2s ease';
+
+            // Redireciona após a animação terminar
+            setTimeout(() => {
+                window.location.href = 'leaderboard.html';
+            }, 200); // 200ms = duração da animação
+        });
+    }
 
     // Adicionar redirecionamento ao clicar nos contadores (Dragon Coins e Energia)
     const dragonCoinCounter = document.querySelector('.main-dragoncoin'); // Seleciona o contador de Dragon Coins
