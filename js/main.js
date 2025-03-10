@@ -217,6 +217,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Atualiza os dados do jogador
                 if (gameData.player) {
                     Object.assign(player, gameData.player);
+    
+                    // Calcula o tempo passado desde a última atualização
+                    const now = Date.now();
+                    const lastUpdate = gameData.player.lastUpdate || now;
+                    const timePassed = now - lastUpdate; // Tempo em milissegundos
+    
+                    // Calcula a energia regenerada com base no tempo passado
+                    const energyRegenerated = Math.floor(timePassed / 1000); // 1 energia por segundo
+                    player.energy = Math.min(player.energy + energyRegenerated, player.maxEnergy);
+    
                     console.log('Dados do jogador carregados:', player);
                 } else {
                     console.error('Dados do jogador não encontrados.');
@@ -235,6 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Nenhum dado encontrado. Redirecionando para index.html');
                 window.location.href = 'index.html';
             }
+    
+            // Inicializa o jogo após carregar os dados
+            initializeGame();
         });
     }
        
@@ -255,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 upgradeEnergyCost: player.upgradeEnergyCost,
                 power: player.power,
                 rank: player.rank,
-                lastUpdate: Date.now(),
+                lastUpdate: Date.now(), // Salva o momento da última atualização
                 playerName: player.playerName,
                 playerPhoto: player.playerPhoto
             },
@@ -763,16 +776,7 @@ document.querySelector('#clear-storage')?.addEventListener('click', () => {
             } else {
                 console.log('Dados do jogador removidos com sucesso.');
 
-                // Remove o estado do inimigo do CloudStorage
-                Telegram.WebApp.CloudStorage.removeItem('enemyState', function(err) {
-                    if (err) {
-                        console.error('Erro ao limpar o estado do inimigo:', err);
-                    } else {
-                        console.log('Estado do inimigo removido com sucesso.');
-                    }
-                });
-
-                // Define os valores iniciais do jogo
+                // Define os valores iniciais do jogador
                 const initialPlayerData = {
                     selectedCharacter: 'Gohan', // Personagem padrão
                     playerName: 'Jogador', // Nome padrão
@@ -793,13 +797,28 @@ document.querySelector('#clear-storage')?.addEventListener('click', () => {
                     lastUpdate: Date.now()
                 };
 
+                // Define os valores iniciais do inimigo
+                const initialEnemyData = {
+                    currentEnemyIndex: 0, // Índice do primeiro inimigo
+                    currentEnemyHealth: 1000, // Vida inicial
+                    currentEnemyMaxHealth: 1000, // Vida máxima inicial
+                    currentEnemyImage: "imagens/raditz.png", // Imagem inicial
+                    currentEnemyBackground: "imagens/1_bg.jpg" // Fundo inicial
+                };
+
+                // Cria o objeto gameData unificado
+                const gameData = {
+                    player: initialPlayerData,
+                    enemy: initialEnemyData
+                };
+
                 // Salva os dados iniciais no CloudStorage
-                Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(initialPlayerData), function(err) {
+                Telegram.WebApp.CloudStorage.setItem('gameData', JSON.stringify(gameData), function(err) {
                     if (err) {
                         console.error('Erro ao salvar dados iniciais:', err);
                         showError('Erro ao salvar dados iniciais. Tente novamente.');
                     } else {
-                        console.log('Jogo resetado com sucesso:', initialPlayerData);
+                        console.log('Jogo resetado com sucesso:', gameData);
                         showMessage('Jogo resetado com sucesso. Recarregue a página.');
 
                         // Reseta a vida e a lista de inimigos
@@ -1068,9 +1087,9 @@ if (profilePicture) {
     });
 }
 
-// Salva o progresso ao fechar a janela
+// Salva os dados do jogo antes de fechar a janela
 window.addEventListener('beforeunload', () => {
-    saveGameData();
+    saveGameData(); // Garante que os dados sejam salvos antes de fechar
 });
 
 });
