@@ -38,13 +38,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Redirecionando para index.html');
                 window.location.href = 'index.html';
             } else {
-                // Atualiza os dados do jogador e do inimigo
-                Object.assign(player, gameData.player);
-                currentEnemyIndex = gameData.enemy.currentEnemyIndex;
-                enemy.health = gameData.enemy.currentEnemyHealth;
-                enemy.maxHealth = gameData.enemy.currentEnemyMaxHealth;
+                // Atualiza os dados do jogador
+                if (gameData.player) {
+                    Object.assign(player, gameData.player);
+                    console.log('Dados do jogador atualizados:', player);
+                } else {
+                    console.error('Dados do jogador não encontrados.');
+                }
 
-                console.log('Dados do jogador e inimigo atualizados:', { player, enemy });
+                // Atualiza os dados do inimigo
+                if (gameData.enemy) {
+                    currentEnemyIndex = gameData.enemy.currentEnemyIndex;
+                    enemy.health = gameData.enemy.currentEnemyHealth;
+                    enemy.maxHealth = gameData.enemy.currentEnemyMaxHealth;
+                    console.log('Dados do inimigo atualizados:', gameData.enemy);
+                } else {
+                    console.error('Dados do inimigo não encontrados.');
+                }
             }
         } else {
             console.log('Nenhum dado encontrado. Redirecionando para index.html');
@@ -540,36 +550,6 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
         }
     }
 
-    function nextEnemy() {
-        // Verifica se é o último inimigo
-        if (currentEnemyIndex >= enemies.length - 1) {
-            console.log('Todos os inimigos foram derrotados!');
-            currentEnemyIndex = 0; // Reinicia o loop
-        } else {
-            currentEnemyIndex += 1; // Avança para o próximo inimigo
-        }
-
-        // Atualiza os dados do inimigo atual
-        const nextEnemy = enemies[currentEnemyIndex];
-        enemy.health = nextEnemy.health;
-        enemy.maxHealth = nextEnemy.maxHealth;
-
-        // Atualiza a imagem do inimigo
-        const enemyImage = document.querySelector('.enemy-image');
-        if (enemyImage) enemyImage.src = nextEnemy.image;
-
-        // Atualiza o fundo
-        const backgroundImage = document.getElementById('backgroundImage');
-        if (backgroundImage) backgroundImage.src = nextEnemy.background;
-
-        // Atualiza a barra de vida
-        updateHealthBar();
-
-        // Salva o estado do inimigo
-        saveGameData();
-        console.log('Próximo inimigo:', nextEnemy.name);
-    }
-
     function attackEnemy(event) {
         const upgradeModal = document.getElementById('upgradeModal');
         const rewardModal = document.getElementById('rewardModal');
@@ -854,11 +834,11 @@ function showMessage(message) {
     // Próximo inimigo
     function nextEnemy() {
         console.log('Passando para o próximo inimigo...');
-        
+    
         // Atualiza o índice circularmente
         currentEnemyIndex = (currentEnemyIndex + 1) % enemies.length;
         const nextEnemy = enemies[currentEnemyIndex];
-        
+    
         console.log('Próximo inimigo:', nextEnemy.name);
         console.log('Índice do inimigo atual:', currentEnemyIndex);
     
@@ -886,9 +866,11 @@ function showMessage(message) {
             }, 500); // Duração igual à transição CSS
         }
     
+        // Atualiza a barra de vida
         updateHealthBar();
-        saveGameData();
-        
+    
+        // Salva o estado do inimigo
+        saveGameData(); // Usando a função unificada de salvamento
         console.log('Estado do inimigo salvo:', {
             currentEnemyIndex,
             health: enemy.health,
@@ -1018,22 +1000,22 @@ function showMessage(message) {
         }
     }
 
-    // Inicializar o jogo
-    function initializeGame() {
-        loadEnemyState(); // Carrega o estado do inimigo salvo
-    
-        const firstEnemy = enemies[currentEnemyIndex];
-        // enemy.health = firstEnemy.health; // REMOVA OU COMENTE
-        // enemy.maxHealth = firstEnemy.maxHealth; // REMOVA OU COMENTE
-    
-        const enemyImage = document.querySelector('.enemy-image');
-        if (enemyImage) enemyImage.src = firstEnemy.image;
-    
-        const backgroundImage = document.getElementById('backgroundImage');
-        if (backgroundImage) backgroundImage.src = firstEnemy.background;
-    
-        updateHealthBar();
-    }
+   // Inicializar o jogo
+function initializeGame() {
+    // Dados do inimigo já foram carregados pela loadGameData, então não precisamos carregá-los novamente
+    const firstEnemy = enemies[currentEnemyIndex];
+
+    // Atualiza a imagem do inimigo
+    const enemyImage = document.querySelector('.enemy-image');
+    if (enemyImage) enemyImage.src = firstEnemy.image;
+
+    // Atualiza o fundo da batalha
+    const backgroundImage = document.getElementById('backgroundImage');
+    if (backgroundImage) backgroundImage.src = firstEnemy.background;
+
+    // Atualiza a barra de vida do inimigo
+    updateHealthBar();
+}
 
     loadGameData(); // Carrega o progresso do jogador
     initializeGame(); // Inicializa o jogo
