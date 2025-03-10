@@ -571,40 +571,38 @@ updateRankingPlayer(rankingPlayer);
     function attackEnemy(event) {
         const upgradeModal = document.getElementById('upgradeModal');
         const rewardModal = document.getElementById('rewardModal');
-        
-        if ((upgradeModal?.classList.contains('active')) || 
-            (rewardModal?.style.display === 'block')) {
-            return;
-        }
+    
+        if ([upgradeModal, rewardModal].some(modal => 
+            modal?.classList.contains('active') || 
+            modal?.style.display === 'block'
+        )) return;
     
         if (player.energy < 1) return;
     
-        // Nova animação reforçada
+        // Sistema de dano primeiro
+        const damage = calculateDamage();
+        const effectiveDamage = Math.min(damage, enemy.health);
+        
+        // Sistema de recompensa CORRIGIDO (adição imediata)
+        player.dragonCoins += effectiveDamage; // <-- Esta linha foi movida para cima
+        updateDragonCoins(); // Atualização imediata
+    
+        enemy.health -= effectiveDamage;
+        player.energy = Math.max(player.energy - 1, 0);
+    
+        // Restante do código mantido
+        punchSound.currentTime = 0;
+        punchSound.play().catch(console.error);
+    
         const enemyImage = document.querySelector('.enemy-image');
         if (enemyImage) {
             enemyImage.classList.add('enemy-shake');
+            enemyImage.style.transform = 'scale(1.05)';
             setTimeout(() => {
                 enemyImage.classList.remove('enemy-shake');
-            }, 500);
+                enemyImage.style.transform = 'scale(1)';
+            }, 200);
         }
-    
-        punchSound.currentTime = 0;
-        punchSound.play();
-    
-        const damage = calculateDamage();
-        const effectiveDamage = Math.min(damage, enemy.health);
-        enemy.health -= effectiveDamage;
-        
-        player.dragonCoins += effectiveDamage;
-        player.energy -= 1;
-    
-        // Atualização otimizada
-        requestAnimationFrame(() => {
-            updateHealthBar();
-            updateEnergy();
-            updateDragonCoins();
-            saveProgress();
-        });
     
         showDamageNumber(damage, event.clientX, event.clientY);
     
@@ -613,7 +611,13 @@ updateRankingPlayer(rankingPlayer);
             defeatEnemy();
         }
     
+        requestAnimationFrame(() => {
+            updateHealthBar();
+            updateEnergy();
+        });
+    
         saveEnemyState();
+        saveProgress();
     }
 
 let isSpecialAttackInProgress = false; // Controla se o ataque especial está em andamento
