@@ -217,7 +217,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Atualiza os dados do jogador
                 if (gameData.player) {
                     Object.assign(player, gameData.player);
+    
+                    // Calcula o tempo passado desde a última atualização
+                    const now = Date.now();
+                    const lastUpdate = gameData.player.lastUpdate || now;
+                    const timePassed = now - lastUpdate; // Tempo em milissegundos
+    
+                    // Calcula a energia regenerada com base no tempo passado
+                    const energyRegenerated = Math.floor(timePassed / 1000); // 1 energia por segundo
+                    player.energy = Math.min(player.energy + energyRegenerated, player.maxEnergy);
+    
                     console.log('Dados do jogador carregados:', player);
+    
+                    // Atualiza a interface
+                    updateEnergy();
                 } else {
                     console.error('Dados do jogador não encontrados.');
                 }
@@ -235,64 +248,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Nenhum dado encontrado. Redirecionando para index.html');
                 window.location.href = 'index.html';
             }
+    
+            // Inicializa o jogo após carregar os dados
+            initializeGame();
         });
-    }
-       
-    async function saveGameData() {
-        const gameData = {
-            player: {
-                selectedCharacter: player.selectedCharacter,
-                baseDamage: player.baseDamage,
-                level: player.level,
-                dragonCoins: player.dragonCoins,
-                energy: player.energy,
-                maxEnergy: player.maxEnergy,
-                specialAttackUses: player.specialAttackUses,
-                maxSpecialAttackUses: player.maxSpecialAttackUses,
-                lastSpecialAttackUse: player.lastSpecialAttackUse,
-                upgradeAttackCost: player.upgradeAttackCost,
-                upgradeSpecialCost: player.upgradeSpecialCost,
-                upgradeEnergyCost: player.upgradeEnergyCost,
-                power: player.power,
-                rank: player.rank,
-                lastUpdate: Date.now(),
-                playerName: player.playerName,
-                playerPhoto: player.playerPhoto
-            },
-            enemy: {
-                currentEnemyIndex: currentEnemyIndex,
-                currentEnemyHealth: enemy.health,
-                currentEnemyMaxHealth: enemy.maxHealth
-            }
-        };
-    
-        return new Promise((resolve, reject) => {
-            Telegram.WebApp.CloudStorage.setItem('gameData', JSON.stringify(gameData), function(err) {
-                if (err) {
-                    console.error('Erro ao salvar dados do jogo:', err);
-                    reject(err);
-                } else {
-                    console.log('Dados do jogo salvos com sucesso:', gameData);
-                    resolve();
-                }
-            });
-        });
-    }
-
-    // Função para atualizar o perfil do jogador
-    function updatePlayerProfile() {
-        const playerNameElement = document.getElementById('player-name');
-        const playerPhotoElement = document.getElementById('profile-picture');
-    
-        if (playerNameElement && playerPhotoElement) {
-            // Atualiza o nome do jogador
-            playerNameElement.textContent = player.playerName;
-    
-            // Atualiza a foto do jogador
-            playerPhotoElement.src = player.playerPhoto;
-        } else {
-            console.error('Elementos do header não encontrados.');
-        }
     }
 
 // Verifica mudanças no perfil do Telegram
