@@ -1,3 +1,30 @@
+const player = {
+    baseDamage: 1,
+    level: 1,
+    dragonCoins: 0,
+    energy: 0,
+    maxEnergy: 60,
+    specialAttackUses: 5,
+    maxSpecialAttackUses: 5,
+    lastSpecialAttackUse: 0,
+    upgradeAttackCost: 100,
+    upgradeSpecialCost: 100,
+    upgradeEnergyCost: 50,
+    power: 0,
+    rank: 0,
+    selectedCharacter: 'Gohan',
+    playerName: 'Jogador',
+    playerPhoto: 'imagens/default_profile.png',
+    lastUpdate: Date.now()
+};
+
+const enemy = {
+    health: 1000,
+    maxHealth: 1000
+};
+
+let isSpecialAttackInProgress = false; // Variável global para controlar o ataque especial
+
 window.addEventListener('telegram-ready', () => {
     console.log('Telegram.WebApp está pronto!');
     Telegram.WebApp.ready();
@@ -38,23 +65,6 @@ window.addEventListener('popstate', () => {
         window.location.href = 'main.html';
     }
 });
-
-    const player = window.player || {
-        baseDamage: 1,
-        level: 1,
-        dragonCoins: 0,
-        energy: 0,
-        maxEnergy: 60,
-        specialAttackUses: 5, // Cargas atuais
-        maxSpecialAttackUses: 5, // Valor máximo de cargas (pode aumentar com upgrades)
-        lastSpecialAttackUse: 0,
-        upgradeAttackCost: 100,
-        upgradeSpecialCost: 100,
-        upgradeEnergyCost: 50,
-        power: 0,
-        rank: 0,
-        selectedCharacter: 'Gohan' // Valor padrão
-    };
 
     const punchSound = new Audio('sounds/punch_1.ogg');
     const specialAttackSound = new Audio('sounds/special_attack.mp3');
@@ -149,11 +159,6 @@ window.addEventListener('popstate', () => {
                 "Trunks SSJR" // Níveis 70+
             ]
         }
-    };
-
-    const enemy = {
-        health: 1000,
-        maxHealth: 1000
     };
 
     const enemies = [
