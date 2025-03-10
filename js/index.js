@@ -1,4 +1,4 @@
-import enemies from 'js/enemies.js';
+import enemies from './enemies.js';
 
 // Inicializa o Telegram WebApp
 Telegram.WebApp.ready();
