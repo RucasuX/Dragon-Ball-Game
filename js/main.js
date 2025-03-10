@@ -569,55 +569,75 @@ updateRankingPlayer(rankingPlayer);
     }
 
     function attackEnemy(event) {
+        console.log('[DEBUG] Attack event triggered'); // Debug 1
+        
+        // Verifica se os elementos existem
         const upgradeModal = document.getElementById('upgradeModal');
         const rewardModal = document.getElementById('rewardModal');
-    
-        if ([upgradeModal, rewardModal].some(modal => 
-            modal?.classList.contains('active') || 
-            modal?.style.display === 'block'
-        )) return;
-    
-        if (player.energy < 1) return;
-    
-        // Sistema de dano primeiro
-        const damage = calculateDamage();
-        const effectiveDamage = Math.min(damage, enemy.health);
-        
-        // Sistema de recompensa CORRIGIDO (adição imediata)
-        player.dragonCoins += effectiveDamage; // <-- Esta linha foi movida para cima
-        updateDragonCoins(); // Atualização imediata
-    
-        enemy.health -= effectiveDamage;
-        player.energy = Math.max(player.energy - 1, 0);
-    
-        // Restante do código mantido
-        punchSound.currentTime = 0;
-        punchSound.play().catch(console.error);
-    
-        const enemyImage = document.querySelector('.enemy-image');
-        if (enemyImage) {
-            enemyImage.classList.add('enemy-shake');
-            enemyImage.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                enemyImage.classList.remove('enemy-shake');
-                enemyImage.style.transform = 'scale(1)';
-            }, 200);
+        if (!upgradeModal || !rewardModal) {
+            console.error('Elementos modais não encontrados!');
+            return;
         }
     
-        showDamageNumber(damage, event.clientX, event.clientY);
+        // Verificação de modais aberto com debug
+        const modalAberto = [upgradeModal, rewardModal].some(modal => 
+            modal.classList.contains('active') || 
+            modal.style.display === 'block'
+        );
+        console.log(`[DEBUG] Modal aberto: ${modalAberto}`); // Debug 2
+        if (modalAberto) return;
     
-        if (enemy.health <= 0) {
-            enemy.health = 0;
-            defeatEnemy();
+        // Verificação de energia com debug
+        console.log(`[DEBUG] Energia antes: ${player.energy}`); // Debug 3
+        if (player.energy < 1) {
+            console.log('[DEBUG] Energia insuficiente para ataque');
+            return;
         }
     
-        requestAnimationFrame(() => {
-            updateHealthBar();
+        try {
+            // Sistema de dano
+            const damage = calculateDamage();
+            const effectiveDamage = Math.min(damage, enemy.health);
+            console.log(`[DEBUG] Dano calculado: ${damage} | Efetivo: ${effectiveDamage}`); // Debug 4
+    
+            // Atualização de recursos
+            player.dragonCoins += effectiveDamage;
+            enemy.health -= effectiveDamage;
+            player.energy = Math.max(player.energy - 1, 0);
+            console.log(`[DEBUG] Pós-ataque - Energia: ${player.energy} Moedas: ${player.dragonCoins}`); // Debug 5
+    
+            // Atualizações visuais
+            updateDragonCoins();
             updateEnergy();
-        });
+            updateHealthBar();
     
-        saveEnemyState();
-        saveProgress();
+            // Feedback de ataque
+            const enemyImage = document.querySelector('.enemy-image');
+            if (enemyImage) {
+                enemyImage.classList.add('enemy-shake');
+                enemyImage.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    enemyImage.classList.remove('enemy-shake');
+                    enemyImage.style.transform = 'scale(1)';
+                }, 200);
+            }
+    
+            // Números de dano
+            showDamageNumber(effectiveDamage, event.clientX, event.clientY);
+    
+            // Verificação de morte do inimigo
+            if (enemy.health <= 0) {
+                console.log('[DEBUG] Inimigo derrotado');
+                enemy.health = 0;
+                defeatEnemy();
+            }
+    
+            // Salvamento (versão unificada)
+            saveProgress();
+    
+        } catch (error) {
+            console.error('[ERRO] Falha no ataque:', error);
+        }
     }
 
 let isSpecialAttackInProgress = false; // Controla se o ataque especial está em andamento
