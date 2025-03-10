@@ -22,22 +22,27 @@ window.addEventListener('telegram-ready', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    const playerData = JSON.parse(localStorage.getItem('playerProgress'));
-    console.log('Progresso carregado:', playerData); // Log que você compartilhou
+    // Carrega os dados do Cloud Storage do Telegram
+    Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
+        if (err) {
+            console.error('Erro ao carregar progresso:', err);
+            return;
+        }
 
-    if (!playerData || !playerData.selectedCharacter) {
-        console.log('Redirecionando para index.html'); // Verifique se essa mensagem aparece
-        window.location.href = 'index.html';
-    }
+        if (data) {
+            const playerData = JSON.parse(data);
+            console.log('Progresso carregado:', playerData);
 
-    
-window.addEventListener('popstate', () => {
-    const playerData = JSON.parse(localStorage.getItem('playerProgress'));
-    if (playerData) {
-        // Se houver dados, redireciona para main.html
-        window.location.href = 'main.html';
-    }
-});
+            // Verifica se o personagem foi selecionado
+            if (!playerData.selectedCharacter) {
+                console.log('Redirecionando para index.html');
+                window.location.href = 'index.html';
+            }
+        } else {
+            console.log('Nenhum progresso salvo. Iniciando novo jogo.');
+            window.location.href = 'index.html';
+        }
+    });
 
     const player = window.player || {
         baseDamage: 1,
@@ -313,35 +318,42 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
 
     function saveEnemyState() {
         const enemyState = {
-            currentEnemyIndex: currentEnemyIndex, // Salva o índice atual
+            currentEnemyIndex: currentEnemyIndex,
             currentEnemyHealth: enemy.health,
             currentEnemyMaxHealth: enemy.maxHealth
         };
-        localStorage.setItem('enemyState', JSON.stringify(enemyState));
-        console.log('Estado do inimigo salvo:', enemyState);
+    
+        // Salva no Cloud Storage do Telegram
+        Telegram.WebApp.CloudStorage.setItem('enemyState', JSON.stringify(enemyState), function(err) {
+            if (err) {
+                console.error('Erro ao salvar estado do inimigo:', err);
+            } else {
+                console.log('Estado do inimigo salvo:', enemyState);
+            }
+        });
     }
 
     function loadEnemyState() {
-        const enemyState = JSON.parse(localStorage.getItem('enemyState'));
-        if (enemyState) {
-            currentEnemyIndex = enemyState.currentEnemyIndex;
-            enemy.health = enemyState.currentEnemyHealth;
-            enemy.maxHealth = enemyState.currentEnemyMaxHealth;
-            console.log('Estado do inimigo carregado:', enemyState); // Log para depuração
-        } else {
-            currentEnemyIndex = 0;
-            enemy.health = enemies[currentEnemyIndex].health;
-            enemy.maxHealth = enemies[currentEnemyIndex].maxHealth;
-            console.log('Nenhum estado salvo. Iniciando com o primeiro inimigo.'); // Log para depuração
-        }
-    }
-
-    // Atualizar Dragon Coins na interface
-    function updateDragonCoins() {
-        const dragonCoinsElement = document.getElementById('player-coins');
-        const upgradeDragonCoinsElement = document.getElementById('upgrade-player-coins');
-        if (dragonCoinsElement) dragonCoinsElement.textContent = player.dragonCoins;
-        if (upgradeDragonCoinsElement) upgradeDragonCoinsElement.textContent = player.dragonCoins;
+        // Carrega do Cloud Storage do Telegram
+        Telegram.WebApp.CloudStorage.getItem('enemyState', function(err, data) {
+            if (err) {
+                console.error('Erro ao carregar estado do inimigo:', err);
+                return;
+            }
+    
+            if (data) {
+                const enemyState = JSON.parse(data);
+                currentEnemyIndex = enemyState.currentEnemyIndex;
+                enemy.health = enemyState.currentEnemyHealth;
+                enemy.maxHealth = enemyState.currentEnemyMaxHealth;
+                console.log('Estado do inimigo carregado:', enemyState);
+            } else {
+                currentEnemyIndex = 0;
+                enemy.health = enemies[currentEnemyIndex].health;
+                enemy.maxHealth = enemies[currentEnemyIndex].maxHealth;
+                console.log('Nenhum estado salvo. Iniciando com o primeiro inimigo.');
+            }
+        });
     }
 
     // Atualizar Energia na interface
