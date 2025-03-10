@@ -83,29 +83,48 @@ document.querySelector('.select-button').addEventListener('click', () => {
     // Cria o objeto com os dados do jogador
     const playerData = {
         selectedCharacter: selectedCharacter,
-        selectedCharacterImage: selectedCharacterImage, // Salva a imagem do personagem
-        playerName: userData ? userData.first_name : 'Jogador', // Salva o nome do jogador
-        playerPhoto: userData ? userData.photo_url : 'imagens/default_profile.png', // Salva a foto do jogador
+        selectedCharacterImage: selectedCharacterImage,
+        playerName: userData ? userData.first_name : 'Jogador',
+        playerPhoto: userData ? userData.photo_url : 'imagens/default_profile.png',
         level: 1,
         dragonCoins: 0,
         energy: 0,
-        maxEnergy: 0,
+        maxEnergy: 60, // Valor inicial de energia máxima
+        specialAttackUses: 5, // Cargas iniciais de ataque especial
+        maxSpecialAttackUses: 5, // Máximo de cargas de ataque especial
+        lastSpecialAttackUse: 0,
+        upgradeAttackCost: 100,
+        upgradeSpecialCost: 100,
+        upgradeEnergyCost: 50,
         power: 0,
-        rank: 0
+        rank: 0,
+        lastUpdate: Date.now()
+    };
+
+    // Dados iniciais do inimigo
+    const enemyData = {
+        currentEnemyIndex: 0, // Começa com o primeiro inimigo
+        currentEnemyHealth: enemies[0].health, // Vida do primeiro inimigo
+        currentEnemyMaxHealth: enemies[0].maxHealth // Vida máxima do primeiro inimigo
+    };
+
+    // Cria o objeto gameData unificado
+    const gameData = {
+        player: playerData,
+        enemy: enemyData
     };
 
     // Mostrar um spinner ou mensagem de carregamento
     showLoadingIndicator();
 
     // Salva os dados no CloudStorage do Telegram
-    Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(playerData), function(err) {
+    Telegram.WebApp.CloudStorage.setItem('gameData', JSON.stringify(gameData), function(err) {
         if (err) {
             console.error('Erro ao salvar os dados:', err);
-            // Mostrar uma mensagem de erro ao usuário
             showError('Erro ao salvar os dados. Tente novamente.');
         } else {
-            console.log('Dados salvos com sucesso:', playerData);
-            window.location.href = 'main.html'; // Redireciona para a tela principal
+            console.log('Dados salvos com sucesso:', gameData);
+            window.location.href = 'main.html';
         }
     });
 });
