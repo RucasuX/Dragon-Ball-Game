@@ -200,45 +200,36 @@ document.addEventListener('DOMContentLoaded', () => {
             power: 0,
             rank: 0,
             lastUpdate: Date.now(),
-            playerName: 'Jogador', // Nome padrão
-            playerPhoto: 'imagens/default_profile.png' // Foto padrão
+            playerName: 'Jogador',
+            playerPhoto: 'imagens/default_profile.png',
+            currentEnemyIndex: 0
         };
     
-        // Carrega os dados do CloudStorage
         Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
             if (data) {
                 const savedData = JSON.parse(data);
                 Object.assign(player, defaultData, savedData);
     
-                // Verifica se o perfil do Telegram mudou
-                const user = Telegram.WebApp.initDataUnsafe.user;
-                if (user) {
-                    // Atualiza o nome e a foto do jogador com os dados do Telegram
-                    player.playerName = user.first_name || 'Jogador';
-                    player.playerPhoto = user.photo_url || 'imagens/default_profile.png';
-                }
-    
-                // Calcular energia acumulada durante o tempo offline
                 const currentTime = Date.now();
                 const elapsedSeconds = Math.floor((currentTime - player.lastUpdate) / 1000);
-                
-                // Calcular energia máxima que pode ser adicionada
-                const maxPossibleEnergy = player.maxEnergy - player.energy;
-                const energyToAdd = Math.min(elapsedSeconds, maxPossibleEnergy);
-                
-                player.energy += energyToAdd;
-                player.lastUpdate = currentTime; // Atualiza para o momento atual
+                player.energy = Math.min(player.energy + elapsedSeconds, player.maxEnergy);
+                player.lastUpdate = currentTime;
+    
+                // Novo trecho para carregar índice do inimigo
+                if (typeof savedData.currentEnemyIndex !== 'undefined') {
+                    currentEnemyIndex = savedData.currentEnemyIndex;
+                }
+    
+                updateEnergy();
+                saveProgress();
     
                 console.log('Progresso carregado:', player);
-    
-                // Atualiza o nome e a foto do jogador no header
                 updatePlayerProfile();
             } else {
                 console.error('Nenhum dado do jogador encontrado.');
                 Object.assign(player, defaultData);
             }
     
-            // Atualiza a interface
             updateDragonCoins();
             updateEnergy();
             updateUpgradeCosts();
@@ -263,10 +254,12 @@ document.addEventListener('DOMContentLoaded', () => {
             upgradeEnergyCost: player.upgradeEnergyCost,
             power: player.power,
             rank: player.rank,
-            lastUpdate: Date.now()
+            lastUpdate: Date.now(),
+            playerName: player.playerName, // Novo campo
+            playerPhoto: player.playerPhoto, // Novo campo
+            currentEnemyIndex: currentEnemyIndex // Novo campo
         };
     
-        // Salva os dados no CloudStorage do Telegram
         Telegram.WebApp.CloudStorage.setItem('playerProgress', JSON.stringify(saveData), function(err) {
             if (err) {
                 console.error('Erro ao salvar progresso:', err);
@@ -323,7 +316,6 @@ Telegram.WebApp.onEvent('viewportChanged', updatePlayerProfile);
             currentEnemyMaxHealth: enemy.maxHealth
         };
     
-        // Salva no Cloud Storage do Telegram
         Telegram.WebApp.CloudStorage.setItem('enemyState', JSON.stringify(enemyState), function(err) {
             if (err) {
                 console.error('Erro ao salvar estado do inimigo:', err);
@@ -579,55 +571,49 @@ updateRankingPlayer(rankingPlayer);
     function attackEnemy(event) {
         const upgradeModal = document.getElementById('upgradeModal');
         const rewardModal = document.getElementById('rewardModal');
-    
-        // Verifica se algum modal está aberto
-        if (
-            (upgradeModal && upgradeModal.classList.contains('active')) ||
-            (rewardModal && rewardModal.style.display === 'block')
-        ) {
+        
+        if ((upgradeModal?.classList.contains('active')) || 
+            (rewardModal?.style.display === 'block')) {
             return;
         }
     
-        // Verifica se o jogador tem energia para atacar
-        if (player.energy < 1) {
-            return; // Simplesmente retorna sem fazer nada
-        }
+        if (player.energy < 1) return;
     
-        // Toca o som de soco
-        punchSound.currentTime = 0; // Reinicia o som se já estiver tocando
-        punchSound.play();
-    
-        // Executa o ataque
-        const damage = calculateDamage();
-        const effectiveDamage = Math.min(damage, enemy.health); // Dano efetivo (não pode ser maior que a vida restante do inimigo)
-        enemy.health -= effectiveDamage;
-        saveEnemyState(); // Salva o estado do inimigo
-        player.dragonCoins += effectiveDamage; // Ganha moedas com base no dano efetivo
-        player.energy -= 1;
-        updateEnergy();
-        updateDragonCoins();
-    
-        // Mostra o número de dano flutuante
-        showDamageNumber(damage, event.clientX, event.clientY);
-    
-        // Animação de shake no inimigo
+        // Nova animação reforçada
         const enemyImage = document.querySelector('.enemy-image');
         if (enemyImage) {
             enemyImage.classList.add('enemy-shake');
             setTimeout(() => {
                 enemyImage.classList.remove('enemy-shake');
-            }, 200);
+            }, 500);
         }
     
-        // Verifica se o inimigo foi derrotado
+        punchSound.currentTime = 0;
+        punchSound.play();
+    
+        const damage = calculateDamage();
+        const effectiveDamage = Math.min(damage, enemy.health);
+        enemy.health -= effectiveDamage;
+        
+        player.dragonCoins += effectiveDamage;
+        player.energy -= 1;
+    
+        // Atualização otimizada
+        requestAnimationFrame(() => {
+            updateHealthBar();
+            updateEnergy();
+            updateDragonCoins();
+            saveProgress();
+        });
+    
+        showDamageNumber(damage, event.clientX, event.clientY);
+    
         if (enemy.health <= 0) {
             enemy.health = 0;
-            defeatEnemy(); // Chama a função de derrota do inimigo
+            defeatEnemy();
         }
     
-        // Atualiza a barra de vida do inimigo
-        updateHealthBar();
-        saveProgress();
+        saveEnemyState();
     }
 
 let isSpecialAttackInProgress = false; // Controla se o ataque especial está em andamento
@@ -1003,17 +989,18 @@ function showMessage(message) {
 
     // Inicializar o jogo
     function initializeGame() {
-        loadEnemyState(); // Carrega o estado do inimigo salvo
-    
-        const firstEnemy = enemies[currentEnemyIndex];
-        // enemy.health = firstEnemy.health; // REMOVA OU COMENTE
-        // enemy.maxHealth = firstEnemy.maxHealth; // REMOVA OU COMENTE
-    
         const enemyImage = document.querySelector('.enemy-image');
-        if (enemyImage) enemyImage.src = firstEnemy.image;
-    
         const backgroundImage = document.getElementById('backgroundImage');
-        if (backgroundImage) backgroundImage.src = firstEnemy.background;
+    
+        // Carrega dados do inimigo atual baseado no índice
+        const currentEnemy = enemies[currentEnemyIndex];
+        
+        if (enemyImage) enemyImage.src = currentEnemy.image;
+        if (backgroundImage) backgroundImage.src = currentEnemy.background;
+    
+        // Respeita dados carregados do inimigo
+        enemy.health = currentEnemy.health;
+        enemy.maxHealth = currentEnemy.maxHealth;
     
         updateHealthBar();
     }
@@ -1066,6 +1053,13 @@ if (profilePicture) {
 // Salva o progresso ao fechar a janela
 window.addEventListener('beforeunload', () => {
     saveProgress();
+    saveEnemyState();
+    
+    // Garante o salvamento imediato
+    Telegram.WebApp.sendData(JSON.stringify({
+        action: 'save',
+        timestamp: Date.now()
+    }));
 });
 
 });
