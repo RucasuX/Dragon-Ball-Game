@@ -1,3 +1,4 @@
+const enemies = [
 {
     name: "Nappa",
     image: "imagens/nappa.png",
@@ -848,3 +849,4 @@
     background: "imagens/46_bg.jpg",
     levelsGained: 1
 }
+];

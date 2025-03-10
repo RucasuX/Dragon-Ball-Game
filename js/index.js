@@ -1,3 +1,5 @@
+import enemies from './enemies.js';
+
 // Inicializa o Telegram WebApp
 Telegram.WebApp.ready();
 console.log('Telegram.WebApp:', Telegram.WebApp);
@@ -8,10 +10,10 @@ const userData = Telegram.WebApp.initDataUnsafe.user;
 console.log('Dados do usuário:', userData);
 
 // Verifica se os dados do jogador já existem no CloudStorage do Telegram
-Telegram.WebApp.CloudStorage.getItem('playerProgress', function(err, data) {
+Telegram.WebApp.CloudStorage.getItem('gameData', function(err, data) {
     if (data) {
-        const playerData = JSON.parse(data);
-        if (playerData.selectedCharacter) {
+        const gameData = JSON.parse(data);
+        if (gameData.player && gameData.player.selectedCharacter) {
             console.log('Jogador já escolheu um personagem. Redirecionando para main.html');
             window.location.href = 'main.html';
         }
@@ -89,9 +91,9 @@ document.querySelector('.select-button').addEventListener('click', () => {
         level: 1,
         dragonCoins: 0,
         energy: 0,
-        maxEnergy: 60, // Valor inicial de energia máxima
-        specialAttackUses: 5, // Cargas iniciais de ataque especial
-        maxSpecialAttackUses: 5, // Máximo de cargas de ataque especial
+        maxEnergy: 60,
+        specialAttackUses: 5,
+        maxSpecialAttackUses: 5,
         lastSpecialAttackUse: 0,
         upgradeAttackCost: 100,
         upgradeSpecialCost: 100,
@@ -103,9 +105,9 @@ document.querySelector('.select-button').addEventListener('click', () => {
 
     // Dados iniciais do inimigo
     const enemyData = {
-        currentEnemyIndex: 0, // Começa com o primeiro inimigo
-        currentEnemyHealth: enemies[0].health, // Vida do primeiro inimigo
-        currentEnemyMaxHealth: enemies[0].maxHealth // Vida máxima do primeiro inimigo
+        currentEnemyIndex: 0,
+        currentEnemyHealth: enemies[0].health, // Usa a lista de inimigos importada
+        currentEnemyMaxHealth: enemies[0].maxHealth // Usa a lista de inimigos importada
     };
 
     // Cria o objeto gameData unificado
