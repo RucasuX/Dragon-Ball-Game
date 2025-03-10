@@ -89,7 +89,7 @@ document.querySelector('.select-button').addEventListener('click', () => {
         level: 1,
         dragonCoins: 0,
         energy: 0,
-        maxEnergy: 60,
+        maxEnergy: 0,
         power: 0,
         rank: 0
     };
